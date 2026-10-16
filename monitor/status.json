@@ -1,0 +1,28 @@
+{
+ "season": "2026-27",
+ "logged": 0,
+ "graded": 0,
+ "lined": 0,
+ "today": "2026-10-16",
+ "built": "2026-10-16 21:26",
+ "model_version": 1,
+ "weights": {
+  "off": 0.2,
+  "def": 0.25,
+  "pace": 0.25,
+  "fatigue": 0.05,
+  "oppFatigue": 0.05,
+  "avail": 0.1,
+  "l5": 0.1
+ },
+ "expect": {
+  "auc_low": 0.63,
+  "auc_high": 0.68,
+  "auc_all": 0.655,
+  "base_pts": 114.6,
+  "base_under_implied": 0.486
+ },
+ "days": [],
+ "games_today": 0,
+ "alerts": []
+}

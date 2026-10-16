@@ -1,0 +1,67 @@
+name: Weekly backtest + learner
+
+# Every Monday: re-run the full walk-forward backtest including the season so far,
+# let the learner refit the weights (it changes model.json only when the guardrails
+# pass), rebuild the board and pages with the result, and raise issues if needed.
+
+on:
+  schedule:
+    - cron: '0 11 * * 1'       # Monday ~7am ET
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: repo-write
+  cancel-in-progress: false
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TZ: America/New_York
+      PYTHONUNBUFFERED: "1"
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: pip install pandas numpy
+
+      - name: Backtest (all seasons + this season so far)
+        run: python backtest/backtest.py
+
+      - name: Score-threshold rules
+        run: python backtest/rules.py
+
+      - name: Learner (may update model.json)
+        run: python backtest/learn.py
+
+      - name: Backtest report
+        run: python backtest/report.py
+
+      - name: Rebuild board and monitor with the current model
+        run: |
+          python build.py
+          python monitor/grade.py
+          python monitor/accuracy.py
+
+      - name: Raise or clear alerts
+        run: python monitor/alerts.py monitor learner
+
+      - name: Commit and push
+        run: |
+          git config user.name  "nba-monitor-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add model.json index.html data.json monitor.html backtest.html monitor/ backtest/data/ backtest/results.json backtest/learn_status.json
+          if git diff --staged --quiet; then echo "No change this run."; exit 0; fi
+          git commit -m "Weekly backtest + learner $(date '+%Y-%m-%d')"
+          git pull --rebase
+          git push

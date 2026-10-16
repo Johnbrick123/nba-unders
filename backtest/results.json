@@ -1,0 +1,1510 @@
+{
+ "n": 9842,
+ "seasons": [
+  "2022-23",
+  "2023-24",
+  "2024-25",
+  "2025-26"
+ ],
+ "current": "2026-27 (to date)",
+ "current_n": 0,
+ "data_through": "2026-04-12",
+ "base_under": 0.4855,
+ "base_pts": 114.57,
+ "base_implied": 114.16,
+ "sd_resid": 11.97,
+ "ot_share": 0.0512,
+ "ot_extra": 10.9,
+ "inputs": [
+  {
+   "label": "Offense rating (ORtg)",
+   "group": "team",
+   "rho": 0.1765,
+   "rho_resid": -0.02,
+   "auc": 0.4926,
+   "binary": false,
+   "low_under": 0.4982,
+   "high_under": 0.5226,
+   "low_pts": 110.59,
+   "high_pts": 117.34,
+   "low_resid": 0.35,
+   "high_resid": -0.36
+  },
+  {
+   "label": "Team Pts/G",
+   "group": "team",
+   "rho": 0.2176,
+   "rho_resid": -0.0216,
+   "auc": 0.4914,
+   "binary": false,
+   "low_under": 0.5013,
+   "high_under": 0.5099,
+   "low_pts": 110.12,
+   "high_pts": 118.46,
+   "low_resid": 0.41,
+   "high_resid": -0.06
+  },
+  {
+   "label": "Pts L5",
+   "group": "team",
+   "rho": 0.19,
+   "rho_resid": -0.0213,
+   "auc": 0.4878,
+   "binary": false,
+   "low_under": 0.4913,
+   "high_under": 0.5219,
+   "low_pts": 110.62,
+   "high_pts": 117.62,
+   "low_resid": 0.33,
+   "high_resid": -0.17
+  },
+  {
+   "label": "Opp DRtg",
+   "group": "opp",
+   "rho": 0.222,
+   "rho_resid": -0.0007,
+   "auc": 0.4996,
+   "binary": false,
+   "low_under": 0.4901,
+   "high_under": 0.4942,
+   "low_pts": 110.81,
+   "high_pts": 119.13,
+   "low_resid": 0.61,
+   "high_resid": 0.53
+  },
+  {
+   "label": "Opp pts allowed/G",
+   "group": "opp",
+   "rho": 0.2669,
+   "rho_resid": 0.0007,
+   "auc": 0.4986,
+   "binary": false,
+   "low_under": 0.4937,
+   "high_under": 0.4952,
+   "low_pts": 109.92,
+   "high_pts": 119.65,
+   "low_resid": 0.61,
+   "high_resid": 0.44
+  },
+  {
+   "label": "Expected possessions",
+   "group": "matchup",
+   "rho": 0.2225,
+   "rho_resid": 0.0016,
+   "auc": 0.4988,
+   "binary": false,
+   "low_under": 0.4901,
+   "high_under": 0.5048,
+   "low_pts": 110.42,
+   "high_pts": 118.67,
+   "low_resid": 0.37,
+   "high_resid": 0.41
+  },
+  {
+   "label": "Team pace",
+   "group": "team",
+   "rho": 0.1115,
+   "rho_resid": -0.0028,
+   "auc": 0.4995,
+   "binary": false,
+   "low_under": 0.4992,
+   "high_under": 0.5038,
+   "low_pts": 112.3,
+   "high_pts": 116.17,
+   "low_resid": 0.5,
+   "high_resid": 0.15
+  },
+  {
+   "label": "Opp pace",
+   "group": "opp",
+   "rho": 0.2027,
+   "rho_resid": 0.0017,
+   "auc": 0.4983,
+   "binary": false,
+   "low_under": 0.4911,
+   "high_under": 0.5033,
+   "low_pts": 111.21,
+   "high_pts": 118.43,
+   "low_resid": 0.63,
+   "high_resid": 0.27
+  },
+  {
+   "label": "Fatigue index",
+   "group": "spot",
+   "rho": 0.0511,
+   "rho_resid": 0.0113,
+   "auc": 0.504,
+   "binary": false,
+   "low_under": 0.4952,
+   "high_under": 0.4997,
+   "low_pts": 113.67,
+   "high_pts": 115.58,
+   "low_resid": 0.48,
+   "high_resid": 0.64
+  },
+  {
+   "label": "Opp fatigue index",
+   "group": "spot",
+   "rho": 0.0545,
+   "rho_resid": 0.016,
+   "auc": 0.5077,
+   "binary": false,
+   "low_under": 0.5089,
+   "high_under": 0.487,
+   "low_pts": 113.75,
+   "high_pts": 115.54,
+   "low_resid": 0.19,
+   "high_resid": 0.76
+  },
+  {
+   "label": "Scoring share missing",
+   "group": "spot",
+   "rho": 0.1149,
+   "rho_resid": -0.0028,
+   "auc": 0.4969,
+   "binary": false,
+   "low_under": 0.5008,
+   "high_under": 0.4982,
+   "low_pts": 111.57,
+   "high_pts": 115.88,
+   "low_resid": 0.36,
+   "high_resid": 0.43
+  },
+  {
+   "label": "Opp scoring share missing",
+   "group": "spot",
+   "rho": 0.0714,
+   "rho_resid": 0.0085,
+   "auc": 0.5035,
+   "binary": false,
+   "low_under": 0.4901,
+   "high_under": 0.484,
+   "low_pts": 113.37,
+   "high_pts": 116.3,
+   "low_resid": 0.54,
+   "high_resid": 0.87
+  },
+  {
+   "label": "Home court",
+   "group": "spot",
+   "rho": 0.0772,
+   "rho_resid": -0.001,
+   "auc": 0.4979,
+   "binary": true,
+   "yes_pts": 115.57,
+   "no_pts": 113.57,
+   "yes_resid": 0.41,
+   "no_resid": 0.41,
+   "yes_under": 0.4879,
+   "no_under": 0.483,
+   "yes_n": 4921
+  },
+  {
+   "label": "Back-to-back",
+   "group": "spot",
+   "rho": 0.0401,
+   "rho_resid": -0.0008,
+   "auc": 0.4998,
+   "binary": true,
+   "yes_pts": 113.52,
+   "no_pts": 114.8,
+   "yes_resid": 0.46,
+   "no_resid": 0.4,
+   "yes_under": 0.4857,
+   "no_under": 0.4854,
+   "yes_n": 1713
+  },
+  {
+   "label": "Opp back-to-back",
+   "group": "spot",
+   "rho": 0.0318,
+   "rho_resid": 0.0125,
+   "auc": 0.5054,
+   "binary": true,
+   "yes_pts": 115.41,
+   "no_pts": 114.4,
+   "yes_resid": 0.76,
+   "no_resid": 0.34,
+   "yes_under": 0.4723,
+   "no_under": 0.4883,
+   "yes_n": 1713
+  },
+  {
+   "label": "3 games in 4 days",
+   "group": "spot",
+   "rho": 0.0383,
+   "rho_resid": 0.0138,
+   "auc": 0.5052,
+   "binary": false,
+   "low_under": 0.5063,
+   "high_under": 0.4865,
+   "low_pts": 114.17,
+   "high_pts": 114.56,
+   "low_resid": 0.36,
+   "high_resid": 0.88
+  },
+  {
+   "label": "Rest days",
+   "group": "spot",
+   "rho": 0.0468,
+   "rho_resid": 0.0061,
+   "auc": 0.5037,
+   "binary": false,
+   "low_under": 0.4982,
+   "high_under": 0.4891,
+   "low_pts": 113.95,
+   "high_pts": 115.4,
+   "low_resid": 0.43,
+   "high_resid": 0.71
+  },
+  {
+   "label": "Road trip game #",
+   "group": "spot",
+   "rho": 0.0731,
+   "rho_resid": 0.0031,
+   "auc": 0.5002,
+   "binary": false,
+   "low_under": 0.5043,
+   "high_under": 0.4886,
+   "low_pts": 113.65,
+   "high_pts": 115.26,
+   "low_resid": 0.43,
+   "high_resid": 0.6
+  },
+  {
+   "label": "Travel km",
+   "group": "spot",
+   "rho": 0.0402,
+   "rho_resid": 0.0234,
+   "auc": 0.5099,
+   "binary": false,
+   "low_under": 0.5109,
+   "high_under": 0.4825,
+   "low_pts": 113.96,
+   "high_pts": 115.58,
+   "low_resid": 0.14,
+   "high_resid": 0.75
+  },
+  {
+   "label": "Time zones crossed",
+   "group": "spot",
+   "rho": 0.0107,
+   "rho_resid": 0.0198,
+   "auc": 0.5074,
+   "binary": false,
+   "low_under": 0.5084,
+   "high_under": 0.4957,
+   "low_pts": 114.67,
+   "high_pts": 113.52,
+   "low_resid": 0.26,
+   "high_resid": 0.25
+  },
+  {
+   "label": "Visiting altitude",
+   "group": "spot",
+   "rho": -0.0244,
+   "rho_resid": -0.0129,
+   "auc": 0.4985,
+   "binary": true,
+   "yes_pts": 116.46,
+   "no_pts": 114.51,
+   "yes_resid": 1.16,
+   "no_resid": 0.38,
+   "yes_under": 0.4592,
+   "no_under": 0.4864,
+   "yes_n": 331
+  },
+  {
+   "label": "Projected points",
+   "group": "model",
+   "rho": 0.3724,
+   "rho_resid": -0.0095,
+   "auc": 0.4943,
+   "binary": false,
+   "low_under": 0.4962,
+   "high_under": 0.5084,
+   "low_pts": 107.71,
+   "high_pts": 121.29,
+   "low_resid": 0.61,
+   "high_resid": 0.1
+  },
+  {
+   "label": "Edge (book \u2212 proj)",
+   "group": "model",
+   "rho": -0.2619,
+   "rho_resid": -0.0157,
+   "auc": 0.4963,
+   "binary": false,
+   "low_under": 0.4972,
+   "high_under": 0.5023,
+   "low_pts": 119.33,
+   "high_pts": 109.65,
+   "low_resid": 0.47,
+   "high_resid": 0.51
+  }
+ ],
+ "spots": [
+  {
+   "label": "All team-games",
+   "n": 9842,
+   "share": 1.0,
+   "pts": 114.57,
+   "implied": 114.16,
+   "resid": 0.41,
+   "under": 0.4855,
+   "under_lo": 0.4756,
+   "game_under": 0.4895,
+   "pace": 102.07
+  },
+  {
+   "label": "Back-to-back",
+   "n": 1713,
+   "share": 0.174,
+   "pts": 113.52,
+   "implied": 113.06,
+   "resid": 0.46,
+   "under": 0.4857,
+   "under_lo": 0.4621,
+   "game_under": 0.488,
+   "pace": 101.81
+  },
+  {
+   "label": "Back-to-back, away",
+   "n": 911,
+   "share": 0.0926,
+   "pts": 112.6,
+   "implied": 111.85,
+   "resid": 0.75,
+   "under": 0.4731,
+   "under_lo": 0.4409,
+   "game_under": 0.4962,
+   "pace": 101.89
+  },
+  {
+   "label": "Back-to-back, home",
+   "n": 802,
+   "share": 0.0815,
+   "pts": 114.56,
+   "implied": 114.44,
+   "resid": 0.12,
+   "under": 0.5,
+   "under_lo": 0.4655,
+   "game_under": 0.4788,
+   "pace": 101.72
+  },
+  {
+   "label": "3rd game in 4 days",
+   "n": 2547,
+   "share": 0.2588,
+   "pts": 113.8,
+   "implied": 113.64,
+   "resid": 0.16,
+   "under": 0.4916,
+   "under_lo": 0.4722,
+   "game_under": 0.4908,
+   "pace": 101.77
+  },
+  {
+   "label": "4th+ game in 7 days",
+   "n": 6303,
+   "share": 0.6404,
+   "pts": 114.39,
+   "implied": 114.02,
+   "resid": 0.37,
+   "under": 0.4828,
+   "under_lo": 0.4705,
+   "game_under": 0.4866,
+   "pace": 101.73
+  },
+  {
+   "label": "Road game 3+ of a trip",
+   "n": 1482,
+   "share": 0.1506,
+   "pts": 113.8,
+   "implied": 113.35,
+   "resid": 0.45,
+   "under": 0.4899,
+   "under_lo": 0.4645,
+   "game_under": 0.4784,
+   "pace": 101.84
+  },
+  {
+   "label": "Road game 4+ of a trip",
+   "n": 720,
+   "share": 0.0732,
+   "pts": 113.59,
+   "implied": 113.26,
+   "resid": 0.33,
+   "under": 0.4986,
+   "under_lo": 0.4622,
+   "game_under": 0.4792,
+   "pace": 101.82
+  },
+  {
+   "label": "Travelled 2,000+ km",
+   "n": 988,
+   "share": 0.1004,
+   "pts": 114.6,
+   "implied": 114.05,
+   "resid": 0.55,
+   "under": 0.4919,
+   "under_lo": 0.4608,
+   "game_under": 0.501,
+   "pace": 102.29
+  },
+  {
+   "label": "Crossed 2+ time zones",
+   "n": 844,
+   "share": 0.0858,
+   "pts": 114.26,
+   "implied": 114.09,
+   "resid": 0.17,
+   "under": 0.5059,
+   "under_lo": 0.4722,
+   "game_under": 0.5107,
+   "pace": 102.34
+  },
+  {
+   "label": "Visiting Denver / Utah",
+   "n": 331,
+   "share": 0.0336,
+   "pts": 116.46,
+   "implied": 115.3,
+   "resid": 1.16,
+   "under": 0.4592,
+   "under_lo": 0.4063,
+   "game_under": 0.4411,
+   "pace": 102.9
+  },
+  {
+   "label": "3+ days rest",
+   "n": 1983,
+   "share": 0.2015,
+   "pts": 115.44,
+   "implied": 114.72,
+   "resid": 0.72,
+   "under": 0.475,
+   "under_lo": 0.4531,
+   "game_under": 0.4836,
+   "pace": 102.71
+  },
+  {
+   "label": "Rested (2+ days) vs tired opp (B2B)",
+   "n": 1207,
+   "share": 0.1226,
+   "pts": 115.97,
+   "implied": 114.89,
+   "resid": 1.08,
+   "under": 0.464,
+   "under_lo": 0.436,
+   "game_under": 0.4822,
+   "pace": 101.8
+  },
+  {
+   "label": "Tired (B2B) vs rested opp (2+ days)",
+   "n": 1207,
+   "share": 0.1226,
+   "pts": 113.28,
+   "implied": 112.63,
+   "resid": 0.65,
+   "under": 0.483,
+   "under_lo": 0.4549,
+   "game_under": 0.4822,
+   "pace": 101.8
+  },
+  {
+   "label": "Fatigue index 30+",
+   "n": 3523,
+   "share": 0.358,
+   "pts": 113.94,
+   "implied": 113.67,
+   "resid": 0.26,
+   "under": 0.4885,
+   "under_lo": 0.472,
+   "game_under": 0.4874,
+   "pace": 101.88
+  },
+  {
+   "label": "Fatigue index 50+",
+   "n": 1774,
+   "share": 0.1802,
+   "pts": 113.6,
+   "implied": 113.07,
+   "resid": 0.53,
+   "under": 0.482,
+   "under_lo": 0.4588,
+   "game_under": 0.4797,
+   "pace": 101.76
+  },
+  {
+   "label": "Fatigue 30+ and opp rested",
+   "n": 757,
+   "share": 0.0769,
+   "pts": 113.35,
+   "implied": 113.04,
+   "resid": 0.31,
+   "under": 0.5152,
+   "under_lo": 0.4796,
+   "game_under": 0.4941,
+   "pace": 102.32
+  },
+  {
+   "label": "Missing 15%+ of scoring",
+   "n": 5378,
+   "share": 0.5464,
+   "pts": 113.48,
+   "implied": 113.0,
+   "resid": 0.48,
+   "under": 0.4833,
+   "under_lo": 0.4699,
+   "game_under": 0.487,
+   "pace": 101.95
+  },
+  {
+   "label": "Missing 25%+ of scoring",
+   "n": 3362,
+   "share": 0.3416,
+   "pts": 112.53,
+   "implied": 112.14,
+   "resid": 0.38,
+   "under": 0.486,
+   "under_lo": 0.4692,
+   "game_under": 0.4911,
+   "pace": 101.98
+  },
+  {
+   "label": "Opp missing 15%+ of scoring",
+   "n": 5378,
+   "share": 0.5464,
+   "pts": 115.23,
+   "implied": 114.67,
+   "resid": 0.56,
+   "under": 0.4807,
+   "under_lo": 0.4673,
+   "game_under": 0.487,
+   "pace": 101.95
+  },
+  {
+   "label": "Went to overtime",
+   "n": 504,
+   "share": 0.0512,
+   "pts": 124.91,
+   "implied": 113.97,
+   "resid": 10.95,
+   "under": 0.123,
+   "under_lo": 0.0972,
+   "game_under": 0.123,
+   "pace": 112.08
+  }
+ ],
+ "composites": [
+  {
+   "label": "Board score (current weights)",
+   "auc": 0.494,
+   "auc_lg": 0.6688,
+   "rho": 0.3683,
+   "rho_resid": -0.0064,
+   "quintiles": [
+    {
+     "q": 1,
+     "pts": 107.93,
+     "resid": 0.59,
+     "over": 0.5084,
+     "n": 1969
+    },
+    {
+     "q": 2,
+     "pts": 111.8,
+     "resid": 0.31,
+     "over": 0.5061,
+     "n": 1968
+    },
+    {
+     "q": 3,
+     "pts": 114.52,
+     "resid": 0.44,
+     "over": 0.501,
+     "n": 1968
+    },
+    {
+     "q": 4,
+     "pts": 117.44,
+     "resid": 0.59,
+     "over": 0.499,
+     "n": 1968
+    },
+    {
+     "q": 5,
+     "pts": 121.17,
+     "resid": 0.13,
+     "over": 0.4906,
+     "n": 1969
+    }
+   ]
+  },
+  {
+   "label": "Projected points",
+   "auc": 0.4943,
+   "auc_lg": 0.6698,
+   "rho": 0.3724,
+   "rho_resid": -0.0095,
+   "quintiles": [
+    {
+     "q": 1,
+     "pts": 107.71,
+     "resid": 0.61,
+     "over": 0.5038,
+     "n": 1969
+    },
+    {
+     "q": 2,
+     "pts": 111.92,
+     "resid": 0.39,
+     "over": 0.5158,
+     "n": 1968
+    },
+    {
+     "q": 3,
+     "pts": 114.53,
+     "resid": 0.45,
+     "over": 0.4959,
+     "n": 1968
+    },
+    {
+     "q": 4,
+     "pts": 117.41,
+     "resid": 0.51,
+     "over": 0.498,
+     "n": 1968
+    },
+    {
+     "q": 5,
+     "pts": 121.29,
+     "resid": 0.1,
+     "over": 0.4916,
+     "n": 1969
+    }
+   ]
+  }
+ ],
+ "deciles": [
+  {
+   "d": 1,
+   "pts": 106.12,
+   "resid": 0.37,
+   "under": 0.4802,
+   "lo": 6.3,
+   "hi": 32.1
+  },
+  {
+   "d": 2,
+   "pts": 109.75,
+   "resid": 0.81,
+   "under": 0.4736,
+   "lo": 32.1,
+   "hi": 38.2
+  },
+  {
+   "d": 3,
+   "pts": 111.17,
+   "resid": 0.29,
+   "under": 0.4736,
+   "lo": 38.2,
+   "hi": 42.7
+  },
+  {
+   "d": 4,
+   "pts": 112.43,
+   "resid": 0.34,
+   "under": 0.4878,
+   "lo": 42.7,
+   "hi": 46.7
+  },
+  {
+   "d": 5,
+   "pts": 113.91,
+   "resid": 0.48,
+   "under": 0.4797,
+   "lo": 46.7,
+   "hi": 50.4
+  },
+  {
+   "d": 6,
+   "pts": 115.13,
+   "resid": 0.39,
+   "under": 0.4878,
+   "lo": 50.4,
+   "hi": 53.9
+  },
+  {
+   "d": 7,
+   "pts": 116.22,
+   "resid": 0.08,
+   "under": 0.503,
+   "lo": 53.9,
+   "hi": 57.8
+  },
+  {
+   "d": 8,
+   "pts": 118.67,
+   "resid": 1.09,
+   "under": 0.4776,
+   "lo": 57.8,
+   "hi": 62.4
+  },
+  {
+   "d": 9,
+   "pts": 120.04,
+   "resid": 0.54,
+   "under": 0.4888,
+   "lo": 62.4,
+   "hi": 68.7
+  },
+  {
+   "d": 10,
+   "pts": 122.3,
+   "resid": -0.28,
+   "under": 0.5025,
+   "lo": 68.8,
+   "hi": 94.7
+  }
+ ],
+ "bands": [
+  {
+   "band": "<30",
+   "pts": 105.67,
+   "resid": 0.42,
+   "under": 0.4802,
+   "n": 756
+  },
+  {
+   "band": "30-40",
+   "pts": 109.66,
+   "resid": 0.57,
+   "under": 0.4763,
+   "n": 1602
+  },
+  {
+   "band": "40-50",
+   "pts": 112.65,
+   "resid": 0.34,
+   "under": 0.4856,
+   "n": 2469
+  },
+  {
+   "band": "50-60",
+   "pts": 116.23,
+   "resid": 0.54,
+   "under": 0.4873,
+   "n": 2551
+  },
+  {
+   "band": "60-70",
+   "pts": 119.71,
+   "resid": 0.55,
+   "under": 0.4859,
+   "n": 1630
+  },
+  {
+   "band": "70+",
+   "pts": 122.65,
+   "resid": -0.34,
+   "under": 0.5012,
+   "n": 834
+  }
+ ],
+ "edge_table": [
+  {
+   "edge": "\u2264\u22126",
+   "n": 203,
+   "under": 0.4631,
+   "under_lo": 0.3958,
+   "resid": 0.57,
+   "pts": 107.6,
+   "proj": 114.51,
+   "implied": 107.03
+  },
+  {
+   "edge": "\u22126\u2026\u22124",
+   "n": 482,
+   "under": 0.4668,
+   "under_lo": 0.4227,
+   "resid": 0.06,
+   "pts": 108.55,
+   "proj": 113.31,
+   "implied": 108.49
+  },
+  {
+   "edge": "\u22124\u2026\u22122",
+   "n": 1310,
+   "under": 0.5015,
+   "under_lo": 0.4745,
+   "resid": -0.14,
+   "pts": 110.33,
+   "proj": 113.37,
+   "implied": 110.47
+  },
+  {
+   "edge": "\u22122\u20260",
+   "n": 2283,
+   "under": 0.495,
+   "under_lo": 0.4745,
+   "resid": 0.01,
+   "pts": 112.86,
+   "proj": 113.76,
+   "implied": 112.85
+  },
+  {
+   "edge": "0\u20262",
+   "n": 2638,
+   "under": 0.4731,
+   "under_lo": 0.4541,
+   "resid": 0.65,
+   "pts": 115.5,
+   "proj": 113.84,
+   "implied": 114.84
+  },
+  {
+   "edge": "2\u20264",
+   "n": 1844,
+   "under": 0.5005,
+   "under_lo": 0.4777,
+   "resid": 0.23,
+   "pts": 117.14,
+   "proj": 114.03,
+   "implied": 116.91
+  },
+  {
+   "edge": "4\u20266",
+   "n": 781,
+   "under": 0.4661,
+   "under_lo": 0.4313,
+   "resid": 0.8,
+   "pts": 120.1,
+   "proj": 114.47,
+   "implied": 119.3
+  },
+  {
+   "edge": "6+",
+   "n": 295,
+   "under": 0.4644,
+   "under_lo": 0.4083,
+   "resid": 0.91,
+   "pts": 122.4,
+   "proj": 114.13,
+   "implied": 121.5
+  }
+ ],
+ "game_edge_table": [
+  {
+   "edge": "\u2264\u22128",
+   "n": 238,
+   "under": 0.479,
+   "under_lo": 0.4164,
+   "total": 215.41,
+   "proj": 226.03,
+   "actual": 216.18
+  },
+  {
+   "edge": "\u22128\u2026\u22125",
+   "n": 390,
+   "under": 0.5154,
+   "under_lo": 0.4659,
+   "total": 219.56,
+   "proj": 225.91,
+   "actual": 218.84
+  },
+  {
+   "edge": "\u22125\u2026\u22122.5",
+   "n": 599,
+   "under": 0.5025,
+   "under_lo": 0.4626,
+   "total": 222.35,
+   "proj": 226.03,
+   "actual": 222.39
+  },
+  {
+   "edge": "\u22122.5\u20260",
+   "n": 811,
+   "under": 0.4932,
+   "under_lo": 0.4589,
+   "total": 225.0,
+   "proj": 226.19,
+   "actual": 225.52
+  },
+  {
+   "edge": "0\u20262.5",
+   "n": 898,
+   "under": 0.4722,
+   "under_lo": 0.4397,
+   "total": 228.73,
+   "proj": 227.47,
+   "actual": 229.73
+  },
+  {
+   "edge": "2.5\u20265",
+   "n": 849,
+   "under": 0.4841,
+   "under_lo": 0.4506,
+   "total": 231.84,
+   "proj": 228.11,
+   "actual": 231.94
+  },
+  {
+   "edge": "5\u20268",
+   "n": 686,
+   "under": 0.5029,
+   "under_lo": 0.4656,
+   "total": 235.38,
+   "proj": 229.04,
+   "actual": 236.91
+  },
+  {
+   "edge": "8+",
+   "n": 447,
+   "under": 0.4765,
+   "under_lo": 0.4306,
+   "total": 240.83,
+   "proj": 230.55,
+   "actual": 242.28
+  }
+ ],
+ "game_n": 4921,
+ "game_base_under": 0.4895,
+ "game_sd": 18.87,
+ "team_sd": 11.66,
+ "proj_bias": 0.73,
+ "game_rho_resid": -0.0207,
+ "measured": {
+  "home": 1.0091,
+  "away": 0.987,
+  "fatigueK": 0.0355,
+  "oppFatigueK": 0.0249,
+  "availK": 0.083,
+  "sdTeam": 11.66,
+  "sdGame": 18.87
+ },
+ "coef": {
+  "off": 0.885,
+  "def": 1.022,
+  "pace": 1.17,
+  "fatigue": 0.229,
+  "oppFatigue": 0.225,
+  "avail": 0.477,
+  "l5": 0.501
+ },
+ "fitted_w": {
+  "off": 0.196,
+  "def": 0.227,
+  "pace": 0.26,
+  "fatigue": 0.051,
+  "oppFatigue": 0.05,
+  "avail": 0.106,
+  "l5": 0.111
+ },
+ "per_season_w": {
+  "2022-23": {
+   "off": 0.211,
+   "def": 0.277,
+   "pace": 0.251,
+   "fatigue": 0.065,
+   "oppFatigue": 0.066,
+   "avail": 0.13,
+   "l5": 0.0
+  },
+  "2023-24": {
+   "off": 0.162,
+   "def": 0.221,
+   "pace": 0.253,
+   "fatigue": 0.043,
+   "oppFatigue": 0.064,
+   "avail": 0.073,
+   "l5": 0.185
+  },
+  "2024-25": {
+   "off": 0.197,
+   "def": 0.271,
+   "pace": 0.218,
+   "fatigue": 0.035,
+   "oppFatigue": 0.047,
+   "avail": 0.066,
+   "l5": 0.167
+  },
+  "2025-26": {
+   "off": 0.154,
+   "def": 0.327,
+   "pace": 0.25,
+   "fatigue": 0.059,
+   "oppFatigue": 0.059,
+   "avail": 0.11,
+   "l5": 0.042
+  }
+ },
+ "suggested_w": {
+  "off": 0.2,
+  "def": 0.25,
+  "pace": 0.25,
+  "fatigue": 0.05,
+  "oppFatigue": 0.05,
+  "avail": 0.1,
+  "l5": 0.1
+ },
+ "test": {
+  "season": "2025-26",
+  "n": 2460,
+  "default_auc": 0.6685,
+  "fitted_auc": 0.6685,
+  "proj_auc": 0.6705,
+  "default_mkt": 0.4928,
+  "fitted_mkt": 0.4928,
+  "edge_mkt": 0.4976,
+  "default_q": [
+   {
+    "q": 1,
+    "pts": 109.13,
+    "resid": 0.32,
+    "over": 0.498,
+    "n": 492
+   },
+   {
+    "q": 2,
+    "pts": 112.69,
+    "resid": 0.12,
+    "over": 0.5061,
+    "n": 492
+   },
+   {
+    "q": 3,
+    "pts": 115.39,
+    "resid": 0.27,
+    "over": 0.502,
+    "n": 492
+   },
+   {
+    "q": 4,
+    "pts": 118.02,
+    "resid": -0.04,
+    "over": 0.4898,
+    "n": 492
+   },
+   {
+    "q": 5,
+    "pts": 122.78,
+    "resid": 0.55,
+    "over": 0.5,
+    "n": 492
+   }
+  ],
+  "fitted_q": [
+   {
+    "q": 1,
+    "pts": 109.13,
+    "resid": 0.32,
+    "over": 0.498,
+    "n": 492
+   },
+   {
+    "q": 2,
+    "pts": 112.69,
+    "resid": 0.12,
+    "over": 0.5061,
+    "n": 492
+   },
+   {
+    "q": 3,
+    "pts": 115.39,
+    "resid": 0.27,
+    "over": 0.502,
+    "n": 492
+   },
+   {
+    "q": 4,
+    "pts": 118.02,
+    "resid": -0.04,
+    "over": 0.4898,
+    "n": 492
+   },
+   {
+    "q": 5,
+    "pts": 122.78,
+    "resid": 0.55,
+    "over": 0.5,
+    "n": 492
+   }
+  ]
+ },
+ "by_season": [
+  {
+   "season": "2022-23",
+   "n": 2460,
+   "board": 0.6388,
+   "board_mkt": 0.4654,
+   "edge": 0.5139,
+   "under": 0.4846,
+   "pts": 114.69,
+   "resid": 0.93
+  },
+  {
+   "season": "2023-24",
+   "n": 2462,
+   "board": 0.6894,
+   "board_mkt": 0.5061,
+   "edge": 0.493,
+   "under": 0.4878,
+   "pts": 114.21,
+   "resid": 0.12
+  },
+  {
+   "season": "2024-25",
+   "n": 2460,
+   "board": 0.6904,
+   "board_mkt": 0.5097,
+   "edge": 0.482,
+   "under": 0.487,
+   "pts": 113.79,
+   "resid": 0.35
+  },
+  {
+   "season": "2025-26",
+   "n": 2460,
+   "board": 0.6685,
+   "board_mkt": 0.4928,
+   "edge": 0.4976,
+   "under": 0.4825,
+   "pts": 115.6,
+   "resid": 0.24
+  }
+ ],
+ "proj_slope": 1.004,
+ "auc_lg_all": 0.6688,
+ "auc_mkt_all": 0.494,
+ "rules": {
+  "seasons": [
+   "2022-23",
+   "2023-24",
+   "2024-25",
+   "2025-26"
+  ],
+  "test": "2025-26",
+  "team_n": 9842,
+  "game_n": 4921,
+  "rows": [
+   {
+    "label": "All team totals",
+    "kind": "team",
+    "side": "all",
+    "n": 9842,
+    "under": 0.4855,
+    "under_lo": 0.4756,
+    "resid": 0.41,
+    "test_n": 2460,
+    "test_under": 0.4825,
+    "share": 1.0
+   },
+   {
+    "label": "Team score under 25",
+    "kind": "team",
+    "side": "under",
+    "n": 334,
+    "under": 0.488,
+    "under_lo": 0.4349,
+    "resid": 0.52,
+    "test_n": 73,
+    "test_under": 0.5068,
+    "share": 0.0339
+   },
+   {
+    "label": "Team score under 30",
+    "kind": "team",
+    "side": "under",
+    "n": 756,
+    "under": 0.4802,
+    "under_lo": 0.4447,
+    "resid": 0.42,
+    "test_n": 165,
+    "test_under": 0.4485,
+    "share": 0.0768
+   },
+   {
+    "label": "Team score under 35",
+    "kind": "team",
+    "side": "under",
+    "n": 1414,
+    "under": 0.4802,
+    "under_lo": 0.4542,
+    "resid": 0.59,
+    "test_n": 330,
+    "test_under": 0.4606,
+    "share": 0.1437
+   },
+   {
+    "label": "Team score 65 or higher",
+    "kind": "team",
+    "side": "over",
+    "n": 1501,
+    "under": 0.4943,
+    "under_lo": 0.4804,
+    "resid": 0.13,
+    "test_n": 272,
+    "test_under": 0.4816,
+    "share": 0.1525
+   },
+   {
+    "label": "Team score 70 or higher",
+    "kind": "team",
+    "side": "over",
+    "n": 834,
+    "under": 0.5012,
+    "under_lo": 0.4649,
+    "resid": -0.34,
+    "test_n": 131,
+    "test_under": 0.4809,
+    "share": 0.0847
+   },
+   {
+    "label": "Team score 75 or higher",
+    "kind": "team",
+    "side": "over",
+    "n": 415,
+    "under": 0.4651,
+    "under_lo": 0.4869,
+    "resid": 0.34,
+    "test_n": 53,
+    "test_under": 0.4528,
+    "share": 0.0422
+   },
+   {
+    "label": "Edge 2+ toward the under",
+    "kind": "team",
+    "side": "under",
+    "n": 2920,
+    "under": 0.4877,
+    "under_lo": 0.4696,
+    "resid": 0.45,
+    "test_n": 646,
+    "test_under": 0.4752,
+    "share": 0.2967
+   },
+   {
+    "label": "Edge 3+ toward the under",
+    "kind": "team",
+    "side": "under",
+    "n": 1829,
+    "under": 0.4817,
+    "under_lo": 0.4588,
+    "resid": 0.54,
+    "test_n": 411,
+    "test_under": 0.4599,
+    "share": 0.1858
+   },
+   {
+    "label": "Edge 4+ toward the under",
+    "kind": "team",
+    "side": "under",
+    "n": 1076,
+    "under": 0.4656,
+    "under_lo": 0.436,
+    "resid": 0.83,
+    "test_n": 261,
+    "test_under": 0.4406,
+    "share": 0.1093
+   },
+   {
+    "label": "Edge 6+ toward the under",
+    "kind": "team",
+    "side": "under",
+    "n": 295,
+    "under": 0.4644,
+    "under_lo": 0.4083,
+    "resid": 0.91,
+    "test_n": 82,
+    "test_under": 0.439,
+    "share": 0.03
+   },
+   {
+    "label": "Edge 3+ and score under 40",
+    "kind": "team",
+    "side": "under",
+    "n": 327,
+    "under": 0.4985,
+    "under_lo": 0.4446,
+    "resid": 0.06,
+    "test_n": 86,
+    "test_under": 0.5,
+    "share": 0.0332
+   },
+   {
+    "label": "Edge 3+ on a back-to-back",
+    "kind": "team",
+    "side": "under",
+    "n": 388,
+    "under": 0.4691,
+    "under_lo": 0.42,
+    "resid": 0.93,
+    "test_n": 85,
+    "test_under": 0.4588,
+    "share": 0.0394
+   },
+   {
+    "label": "Edge 3+ and fatigue 30+",
+    "kind": "team",
+    "side": "under",
+    "n": 812,
+    "under": 0.484,
+    "under_lo": 0.4498,
+    "resid": 0.26,
+    "test_n": 178,
+    "test_under": 0.427,
+    "share": 0.0825
+   },
+   {
+    "label": "Edge 3+ toward the over",
+    "kind": "team",
+    "side": "over",
+    "n": 1255,
+    "under": 0.4661,
+    "under_lo": 0.5062,
+    "resid": 1.14,
+    "test_n": 352,
+    "test_under": 0.4489,
+    "share": 0.1275
+   },
+   {
+    "label": "All games",
+    "kind": "game",
+    "side": "all",
+    "n": 4921,
+    "under": 0.4895,
+    "under_lo": 0.4756,
+    "resid": 0.82,
+    "test_n": 1230,
+    "test_under": 0.5065,
+    "share": 1.0
+   },
+   {
+    "label": "Combined under 60",
+    "kind": "game",
+    "side": "under",
+    "n": 116,
+    "under": 0.5,
+    "under_lo": 0.4105,
+    "resid": 0.19,
+    "test_n": 14,
+    "test_under": 0.2857,
+    "share": 0.0236
+   },
+   {
+    "label": "Combined under 70",
+    "kind": "game",
+    "side": "under",
+    "n": 388,
+    "under": 0.4923,
+    "under_lo": 0.4428,
+    "resid": 0.78,
+    "test_n": 66,
+    "test_under": 0.4848,
+    "share": 0.0788
+   },
+   {
+    "label": "Combined under 80",
+    "kind": "game",
+    "side": "under",
+    "n": 840,
+    "under": 0.4845,
+    "under_lo": 0.4509,
+    "resid": 0.97,
+    "test_n": 179,
+    "test_under": 0.4804,
+    "share": 0.1707
+   },
+   {
+    "label": "Combined 120 or higher",
+    "kind": "game",
+    "side": "over",
+    "n": 892,
+    "under": 0.4955,
+    "under_lo": 0.4717,
+    "resid": 0.02,
+    "test_n": 135,
+    "test_under": 0.5111,
+    "share": 0.1813
+   },
+   {
+    "label": "Combined 130 or higher",
+    "kind": "game",
+    "side": "over",
+    "n": 407,
+    "under": 0.5061,
+    "under_lo": 0.4456,
+    "resid": 0.01,
+    "test_n": 34,
+    "test_under": 0.5588,
+    "share": 0.0827
+   },
+   {
+    "label": "Game edge 3+ toward the under",
+    "kind": "game",
+    "side": "under",
+    "n": 1810,
+    "under": 0.484,
+    "under_lo": 0.461,
+    "resid": 1.07,
+    "test_n": 420,
+    "test_under": 0.4952,
+    "share": 0.3678
+   },
+   {
+    "label": "Game edge 5+ toward the under",
+    "kind": "game",
+    "side": "under",
+    "n": 1133,
+    "under": 0.4925,
+    "under_lo": 0.4635,
+    "resid": 1.49,
+    "test_n": 250,
+    "test_under": 0.492,
+    "share": 0.2302
+   },
+   {
+    "label": "Game edge 8+ toward the under",
+    "kind": "game",
+    "side": "under",
+    "n": 447,
+    "under": 0.4765,
+    "under_lo": 0.4306,
+    "resid": 1.44,
+    "test_n": 97,
+    "test_under": 0.4742,
+    "share": 0.0908
+   },
+   {
+    "label": "Game edge 5+ toward the over",
+    "kind": "game",
+    "side": "over",
+    "n": 631,
+    "under": 0.4992,
+    "under_lo": 0.4619,
+    "resid": 1.46,
+    "test_n": 147,
+    "test_under": 0.5714,
+    "share": 0.1282
+   }
+  ],
+  "dist": {
+   "team": [
+    32.1,
+    40.6,
+    50.4,
+    60.0,
+    68.8
+   ],
+   "game": [
+    72.8,
+    86.1,
+    100.8,
+    115.5,
+    127.9
+   ]
+  }
+ }
+}

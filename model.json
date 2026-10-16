@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "updated": "2026-10-16",
+  "note": "Weights fit by backtest/backtest.py on points vs league average; learn.py updates them weekly when the guardrails pass. fatigue.* are the points each schedule spot adds to the 0-100 fatigue index. projection.*: fatigueK = share of points a fully tired team (index 100) loses; oppFatigueK = share gained against a fully tired defense; availK = points lost per unit of scoring share missing beyond the typical availBase; shrink = how much of the raw projection's spread is kept (fit as the slope of actual on projected); sdTeam/sdGame = spread of actual points around the projection, for under chances.",
+  "weights": {
+    "off": 0.2,
+    "def": 0.25,
+    "pace": 0.25,
+    "fatigue": 0.05,
+    "oppFatigue": 0.05,
+    "avail": 0.1,
+    "l5": 0.1
+  },
+  "fatigue": {
+    "b2b": 40,
+    "threeInFour": 20,
+    "fourInSeven": 10,
+    "tripGame": 5,
+    "travel": 5,
+    "tz": 5,
+    "altitude": 10,
+    "restBonus": 10
+  },
+  "projection": {
+    "home": 1.006,
+    "away": 0.988,
+    "fatigueK": 0.03,
+    "oppFatigueK": 0.021,
+    "availK": 0.08,
+    "availBase": 0.17,
+    "shrink": 0.82,
+    "gameShrink": 0.82,
+    "sdTeam": 11.7,
+    "sdGame": 19.0,
+    "otShare": 0.051
+  },
+  "priorGames": 15,
+  "expect": {
+    "auc_low": 0.63,
+    "auc_high": 0.68,
+    "auc_all": 0.655,
+    "base_pts": 114.6,
+    "base_under_implied": 0.486
+  },
+  "history": [
+    {
+      "version": 1,
+      "date": "2026-10-16",
+      "weights": {
+        "off": 0.2,
+        "def": 0.25,
+        "pace": 0.25,
+        "fatigue": 0.05,
+        "oppFatigue": 0.05,
+        "avail": 0.1,
+        "l5": 0.1
+      },
+      "why": "First backtest (2022-23 to 2025-26, 9,842 team-games): offense, opponent defense and pace carry most of the ranking of points vs league average; rest and availability add a little; nothing beats the closing line on its own."
+    }
+  ]
+}

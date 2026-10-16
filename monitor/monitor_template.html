@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NBA Accuracy Monitor</title>
+<style>
+/* Layout: same dark board look; status first (alerts + cards), then season tables, then the model and its change history. */
+:root{
+  --bg:#0e1116; --panel:#161b22; --panel2:#1c232d; --line:#2a323d;
+  --txt:#e6edf3; --muted:#8b98a5; --accent:#4a9eff; --good:#7ee0a2; --warn:#f0c674; --bad:#f08a84; --ink:#06121f;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{font-size:18px;margin:0;font-weight:650}
+.date{color:var(--muted);font-size:13px}
+.spacer{flex:1}
+.links{display:flex;gap:12px;font-size:12.5px}.links a{color:var(--accent);text-decoration:none}
+main{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:18px 60px;display:grid;gap:24px}
+h2{font-size:15px;margin:0 0 4px;font-weight:650}
+.lede{color:#c9d4de;margin:0 0 10px;max-width:78ch;font-size:13.5px}
+.sub{color:var(--muted);font-size:12px}
+.alert{border:1px solid var(--line);border-left:4px solid var(--bad);background:var(--panel);border-radius:8px;padding:10px 14px;display:grid;gap:3px}
+.alert.watch{border-left-color:var(--warn)} .alert.info{border-left-color:var(--accent)}
+.alert b{font-size:14px}
+.ok{border-left-color:var(--good)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:3px;align-content:start}
+.card .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.card .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.card .d{font-size:12px;color:#c9d4de}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:7px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+td.l,th.l{text-align:left}
+td.wrap{white-space:normal;text-align:left;min-width:260px;color:#c9d4de;font-size:12.5px}
+.pill{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:650}
+.p-good{background:rgba(126,224,162,.16);color:var(--good)} .p-warn{background:rgba(240,198,116,.14);color:var(--warn)} .p-bad{background:rgba(240,138,132,.14);color:var(--bad)} .p-mute{background:var(--panel2);color:var(--muted)}
+.empty{color:var(--muted);padding:14px;text-align:center}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+ul.plain{margin:0;padding-left:18px;display:grid;gap:5px;color:#c9d4de;max-width:80ch;font-size:13.5px}
+</style></head><body>
+<header><h1>🏀 NBA Accuracy Monitor</h1><span class="date" id="hdr"></span><span class="spacer"></span>
+<nav class="links"><a href="index.html">Board</a><a href="backtest.html">Backtest</a></nav></header>
+<main>
+  <section id="alerts"></section>
+  <section><div class="cards" id="cards"></div></section>
+  <section><h2>How the score bands are doing</h2><p class="lede">Pregame score vs what happened against the book's team total. Low bands (the under spots) should stay under the line more often than high bands. "Pts vs line" is actual points minus the posted line: negative means the under side was right on average.</p><div class="panel"><table id="bands"></table></div></section>
+  <section><h2>Does the edge pay?</h2><p class="lede">Edge is the book's team total minus the board's projection. Positive means the book has the team higher than we do, so the under is the play. At −110 you need 52.4% to break even. "Floor" is the 95% lower bound on the under rate given how many games are in the bucket; small buckets swing a lot.</p><div class="panel"><table id="edges"></table></div></section>
+  <section><h2>Schedule spots this season</h2><p class="lede">The schedule situations the fatigue index is built on, scored against the book line. The backtest page shows the same spots over several seasons; this is how they are running now.</p><div class="panel"><table id="spots"></table></div></section>
+  <section><h2>Is each input still working?</h2><p class="lede">Correlation between each sub-score and points minus the book line this season, next to the backtest value. The book already prices season ratings, so these numbers are small by nature; the question is whether each one still points the right way. With a few hundred games ±0.08 is normal wobble, and the ± column shows that range.</p><div class="panel"><table id="inputs"></table></div></section>
+  <section><h2>Last 14 days</h2><p class="lede">Red spots are team totals scored under 35 (the board's under plays). "Edge 3+" counts rows where the book line sat at least 3 points above the projection.</p><div class="panel"><table id="days"></table></div></section>
+  <section><h2>Model and learning</h2><p class="lede" id="learnlede"></p><div class="panel" id="learnbox" style="margin-bottom:10px"><table id="learntbl"></table></div><div class="panel"><table id="hist"></table></div></section>
+  <section><h2>How alerts reach you</h2><ul class="plain">
+    <li>Every run checks the data (board refreshed, games logged and graded, book lines and the injury report coming through). Problems open a GitHub issue on the repo, which emails you.</li>
+    <li>Accuracy alerts wait for 500 graded team-games with a posted line (about early December) so a bad week can't trigger one.</li>
+    <li>The weekly learner refits the weights every Monday. It changes the board only when new weights rank games against the book line better than the current ones on games they weren't fit on, at most once every 4 weeks and by at most 10 points per input. Every change opens an issue saying what changed and why.</li>
+    <li>Issues close themselves when the problem clears. Model-change issues stay open until you close them.</li></ul></section>
+</main>
+<script>
+const S=/*__DATA__*/null;
+const $=s=>document.querySelector(s);
+const pct=(v,d=0)=>v==null||isNaN(v)?'—':(v*100).toFixed(d)+'%';
+const f1=v=>v==null||isNaN(v)?'—':(+v).toFixed(1);
+const f2=v=>v==null||isNaN(v)?'—':(+v).toFixed(2);
+const sgn=(v,d=1)=>v==null||isNaN(v)?'—':`<span class="${v<0?'neg':v>0?'pos':''}">${v>0?'+':''}${(+v).toFixed(d)}</span>`;
+const num=v=>v==null?'—':(+v).toLocaleString();
+const heat=v=>`hsl(${Math.max(0,Math.min(100,v))*1.2} 62% 46%)`;
+const BE=0.524;   // break-even at -110
+const hitPill=(p,n)=>p==null?'—':`<span class="pill ${n&&n<30?'p-mute':p>=BE?'p-good':p>=0.5?'p-warn':'p-bad'}">${pct(p,1)}</span>`;
+const WL={off:'Offense',def:'Opp defense',pace:'Pace',fatigue:'Rest',oppFatigue:'Opp rest',avail:'Availability',l5:'Pts L5'};
+const WK=Object.keys(WL);
+const emptyRow=(t='No graded games yet.')=>`<tr><td class="empty">${t}</td></tr>`;
+
+if(!S){
+  $('#hdr').textContent='no status yet';
+  $('#alerts').innerHTML='<div class="alert info"><b>Nothing to show yet</b><span class="sub">The monitor fills in after the first game-day build and grading run.</span></div>';
+  for(const id of ['bands','edges','spots','inputs','days','learntbl','hist']) $('#'+id).innerHTML=emptyRow();
+  throw new Error('no data');
+}
+const E=S.expect||{}, graded=S.graded||0, lined=S.lined||0, logged=S.logged||0;
+$('#hdr').textContent=`${S.season||'—'} · updated ${S.built||'—'} · model v${S.model_version==null?'—':S.model_version}`;
+
+/* alerts */
+const alerts=S.alerts||[];
+$('#alerts').innerHTML=alerts.length?`<div style="display:grid;gap:8px">${alerts.map(a=>`<div class="alert ${a.level||''}"><b>${a.title}</b><span class="sub">${a.body||''}</span></div>`).join('')}</div>`
+  :`<div class="alert ok"><b>All checks passing</b><span class="sub">Data refreshed, games logged and graded${lined>=500&&S.auc!=null?', and the score is ranking games against the book line within its backtest range':''}.</span></div>`;
+
+/* headline cards */
+const need=Math.max(0,500-lined);
+const aucPill=S.auc==null?'':lined<500?'<span class="pill p-mute">early</span>':(E.auc_low!=null&&S.auc_hi<E.auc_low)?'<span class="pill p-bad">below backtest</span>':(E.auc_low==null||S.auc>=E.auc_low)?'<span class="pill p-good">in range</span>':'<span class="pill p-warn">low edge of range</span>';
+const rb=S.recent_bias;
+$('#cards').innerHTML=[
+ ['Graded team-games',num(graded),need?`${lined.toLocaleString()} with a book line; ${need} more until accuracy alerts switch on.`:`${lined.toLocaleString()} with a book line, ${logged.toLocaleString()} logged this season.`],
+ ['Under rate vs book',S.under_rate==null?'—':pct(S.under_rate,1),S.under_rate==null?'Waiting for graded games with a posted line.':`All ${lined.toLocaleString()} lined team-games. The book aims for 50%; 52.4% is break-even at −110. Avg line ${f1(S.avg_line)}.`],
+ ['Ranking accuracy',S.auc==null?'—':pct(S.auc,1),S.auc==null?'Waiting for graded games with a line.':`${aucPill} How often the score ranks a team that went under the line below one that went over. 95% range ${pct(S.auc_lo,1)}–${pct(S.auc_hi,1)}. Backtest seasons: ${pct(E.auc_low,1)}–${pct(E.auc_high,1)}.`],
+ ['Edge ranking accuracy',S.auc_edge==null?'—':pct(S.auc_edge,1),'Same test, ranking by projection minus book line instead of by score. 50% means the projection adds nothing the book did not know.'],
+ ['Red spots: under hit',S.red&&S.red.n?pct(S.red.under):'—',S.red?`${S.red.n} team totals scored under 35. Needs 52.4% to pay at −110.`:'No red spots graded yet.'],
+ ['Green spots: over hit',S.green&&S.green.n?pct(S.green.over):'—',S.green?`${S.green.n} team totals scored 65+. The over should win here more often than not.`:'No green spots graded yet.'],
+ ['Points vs projection',S.avg_pts==null?'—':`${f1(S.avg_pts)} / ${f1(S.avg_proj)}`,`Actual points per team-game vs projected, season to date.${rb?` Last ${rb.n}: ${rb.diff>0?'+':''}${f1(rb.diff)} pts (z ${f1(rb.z)}).`:''}`],
+ ['Overtime share',S.ot_share==null?'—':pct(S.ot_share,1),'Share of graded team-games that went to overtime. OT adds points no pregame projection can see; the backtest sizes it.'],
+].map(([k,v,d])=>`<div class="card"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span></div>`).join('');
+
+/* score bands */
+const mid={'Under 30':15,'30–40':35,'40–50':45,'50–60':55,'60–70':65,'70+':85};
+$('#bands').innerHTML=S.bands&&S.bands.length?`<thead><tr><th class="l">Score</th><th>Team-games</th><th>Under the line</th><th>Over</th><th>Avg pts</th><th>Pts vs line</th></tr></thead><tbody>${
+  S.bands.map(b=>`<tr><td class="l"><span class="pill" style="background:${heat(mid[b.band]==null?50:mid[b.band])};color:var(--ink)">${b.band}</span></td><td>${num(b.n)}</td><td>${b.n?hitPill(b.under,b.n):'—'}</td><td>${b.under==null?'—':pct(1-b.under)}</td><td>${f1(b.pts)}</td><td>${sgn(b.resid)}</td></tr>`).join('')}</tbody>`:emptyRow();
+
+/* edge buckets */
+$('#edges').innerHTML=S.edges&&S.edges.length?`<thead><tr><th class="l">Edge (book − proj)</th><th>Team-games</th><th>Under the line</th><th>Floor (95%)</th><th>Avg pts</th><th>Avg line</th><th>Pts vs line</th></tr></thead><tbody>${
+  S.edges.map(e=>`<tr><td class="l">${e.edge}</td><td>${num(e.n)}</td><td>${e.n?hitPill(e.under,e.n):'—'}</td><td>${pct(e.under_lo,1)}</td><td>${f1(e.pts)}</td><td>${f1(e.line)}</td><td>${e.pts==null||e.line==null?'—':sgn(e.pts-e.line)}</td></tr>`).join('')}</tbody>
+  <tfoot><tr><td colspan="7" class="sub" style="text-align:left;white-space:normal;border:0">Buckets with fewer than 30 games are greyed. A positive edge bucket that sits above 52.4% with its floor above 50% is a real signal; one that does it with 40 games is probably luck.</td></tr></tfoot>`:emptyRow();
+
+/* schedule spots */
+$('#spots').innerHTML=S.spots&&S.spots.length?`<thead><tr><th class="l">Spot</th><th>Team-games</th><th>Under the line</th><th>Pts vs line</th></tr></thead><tbody>${
+  S.spots.map(s=>`<tr><td class="l">${s.label}</td><td>${num(s.n)}</td><td>${s.n?hitPill(s.under,s.n):'—'}</td><td>${sgn(s.resid)}</td></tr>`).join('')}</tbody>`:emptyRow();
+
+/* inputs */
+$('#inputs').innerHTML=S.inputs&&S.inputs.length?`<thead><tr><th class="l">Input</th><th>Weight</th><th>This season</th><th>±</th><th>Backtest</th><th>Games</th><th class="l">Status</th></tr></thead><tbody>${
+  S.inputs.map(i=>{let p='<span class="pill p-mute">too few games</span>';
+    if(i.rho!=null&&i.n>=300){p=!(i.weight>0)?'<span class="pill p-mute">not in score</span>':i.rho+i.ci<0?'<span class="pill p-bad">pointing wrong way</span>':i.backtest!=null&&i.rho<i.backtest-i.ci?'<span class="pill p-warn">weaker than backtest</span>':'<span class="pill p-good">working</span>'}
+    return `<tr><td class="l">${i.label||WL[i.key]||i.key}</td><td>${i.weight==null?'—':Math.round(i.weight*100)+'%'}</td><td>${i.rho==null?'—':(i.rho>=0?'+':'')+i.rho.toFixed(3)}</td><td>${i.ci==null?'—':'±'+i.ci.toFixed(3)}</td><td>${i.backtest==null?'—':(i.backtest>=0?'+':'')+i.backtest.toFixed(3)}</td><td>${num(i.n)}</td><td class="l">${p}</td></tr>`}).join('')}</tbody>`:emptyRow();
+
+/* daily table */
+$('#days').innerHTML=S.days&&S.days.length?`<thead><tr><th class="l">Date</th><th>Logged</th><th>Graded</th><th>Avg proj</th><th>Avg pts</th><th>Red spots under</th><th>Edge 3+ under</th><th>No line</th></tr></thead><tbody>${
+  S.days.map(d=>`<tr><td class="l">${d.date}</td><td>${num(d.rows)}</td><td>${num(d.graded)}</td><td>${f1(d.proj)}</td><td>${f1(d.pts)}</td><td>${d.red_n?`${d.red_under} of ${d.red_n}`:'—'}</td><td>${d.edge_n?`${d.edge_under} of ${d.edge_n}`:'—'}</td><td>${d.no_line?`<span class="${d.rows&&d.no_line/d.rows>0.5?'neg':''}">${d.no_line}</span>`:'0'}</td></tr>`).join('')}</tbody>`:emptyRow('Nothing logged yet. The first rows appear after the first game-day build.');
+
+/* learner */
+const L=S.learn, M=L&&L.metrics||{};
+$('#learnlede').textContent=L?`Last learner run ${L.date||'—'}: ${L.decision||'—'}. ${L.reason||''}${L.data_through?` Data through ${L.data_through}, ${num(L.current_n)} team-games this season.`:''}`
+  :'The weekly learner runs every Monday morning. Its first result will show here.';
+if(L&&(L.current||L.candidate||L.target)){
+  const row=(lab,w,b)=>`<tr><td class="l">${b?'<b>'+lab+'</b>':lab}</td>${WK.map(k=>`<td>${w&&w[k]!=null?Math.round(w[k]*100)+'%':'—'}</td>`).join('')}</tr>`;
+  const aucs=M.val_n!=null?`<tr><td class="l sub" colspan="${WK.length+1}" style="white-space:normal">Ranking accuracy on the last ${num(M.val_n)} games: current ${pct(M.val_cur,1)}, next step ${pct(M.val_new,1)}, full refit ${pct(M.val_target,1)}. On last season: current ${pct(M.prev_cur,1)}, next step ${pct(M.prev_new,1)}.</td></tr>`:'';
+  $('#learntbl').innerHTML=`<thead><tr><th class="l">Weights</th>${WK.map(k=>`<th>${WL[k]}</th>`).join('')}</tr></thead><tbody>${row('On the board now',L.current,true)}${row('Next step (max 10 pts per input)',L.candidate)}${row('Where the refit wants to go',L.target)}${aucs}</tbody>`;
+}else{ $('#learnbox').hidden=true; }
+
+/* model history */
+const H=S.history||[];
+$('#hist').innerHTML=H.length?`<thead><tr><th class="l">Version</th><th class="l">Date</th>${WK.map(k=>`<th>${WL[k]}</th>`).join('')}<th class="l">Why</th></tr></thead><tbody>${
+  [...H].reverse().map(h=>`<tr><td class="l">v${h.version}</td><td class="l">${h.date}</td>${WK.map(k=>`<td>${Math.round(((h.weights||{})[k]||0)*100)}%</td>`).join('')}<td class="wrap">${h.why||''}</td></tr>`).join('')}</tbody>`
+  :`<thead><tr><th class="l">Weights</th>${WK.map(k=>`<th>${WL[k]}</th>`).join('')}</tr></thead><tbody><tr><td class="l">v${S.model_version==null?'—':S.model_version}</td>${WK.map(k=>`<td>${Math.round(((S.weights||{})[k]||0)*100)}%</td>`).join('')}</tr></tbody>`;
+</script>
+</body></html>

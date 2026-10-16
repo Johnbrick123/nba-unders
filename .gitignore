@@ -1,0 +1,5 @@
+backtest/data/*.log
+backtest/team_games_scored.csv
+backtest/report.html
+__pycache__/
+*.pyc

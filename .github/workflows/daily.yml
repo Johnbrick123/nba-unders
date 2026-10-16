@@ -1,0 +1,59 @@
+name: Daily board + accuracy scan
+
+# Hourly on game days: rebuild the board with the latest injury report and lines, log each
+# game's pregame row (frozen at tip-off), grade finished games, scan accuracy and data
+# health, and open/close GitHub issues for anything that needs you.
+# GitHub cron is UTC and often runs late; hourly runs cover the slate either way.
+
+on:
+  schedule:
+    - cron: '15 13-23 * * *'   # 9:15am-7:15pm ET (EDT)
+    - cron: '15 0-4 * * *'     # 8:15pm-12:15am ET
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: repo-write
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TZ: America/New_York
+      PYTHONUNBUFFERED: "1"
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build board and log pregame rows
+        run: python build.py
+
+      - name: Grade finished games
+        run: python monitor/grade.py
+
+      - name: Accuracy + health scan
+        run: python monitor/accuracy.py
+
+      - name: Raise or clear alerts
+        run: python monitor/alerts.py monitor
+
+      - name: Commit and push if anything changed
+        run: |
+          git config user.name  "nba-monitor-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html data.json monitor.html monitor/ backtest/data/
+          if git diff --staged --quiet; then echo "No change this run."; exit 0; fi
+          git commit -m "Daily update $(date '+%Y-%m-%d %H:%M %Z')"
+          git pull --rebase
+          git push

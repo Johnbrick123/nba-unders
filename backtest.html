@@ -1,0 +1,327 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><title>NBA Backtest</title>
+<style>
+/* Layout: same dark board look as the NBA Unders / NHL Unders pages; a single reading column of findings, each with one chart or table. */
+:root{
+  --bg:#0e1116; --panel:#161b22; --panel2:#1c232d; --line:#2a323d;
+  --txt:#e6edf3; --muted:#8b98a5; --accent:#4a9eff; --chip:#222c38;
+  --good:#7ee0a2; --warn:#f0c674; --bad:#f08a84; --ink:#06121f;
+  --team:#4a9eff; --opp:#c792ea; --spot:#f0c674; --matchup:#7fd1c7; --model:#a98be0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{font-size:18px;margin:0;font-weight:650}
+.date{color:var(--muted);font-size:13px}
+main{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:18px 60px;display:grid;gap:28px}
+h2{font-size:15px;margin:0 0 4px;font-weight:650}
+h3{font-size:13px;margin:0 0 6px;font-weight:650;color:#c9d4de}
+.lede{color:#c9d4de;margin:0 0 12px;max-width:75ch}
+.sub{color:var(--muted);font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.card .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.card .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.card .d{font-size:12.5px;color:#c9d4de}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:7px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+td.l,th.l{text-align:left}
+td.wrap{white-space:normal;text-align:left;min-width:240px;color:#c9d4de;font-size:12.5px}
+.groupsep{border-left:2px solid var(--line)}
+.mini{display:inline-block;min-width:44px;padding:3px 7px;border-radius:5px;font-weight:700;color:var(--ink);text-align:center}
+.pill{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:650}
+.p-good{background:rgba(126,224,162,.16);color:var(--good)} .p-warn{background:rgba(240,198,116,.14);color:var(--warn)} .p-bad{background:rgba(240,138,132,.14);color:var(--bad)} .p-mute{background:var(--panel2);color:var(--muted)}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+.empty{color:var(--muted);padding:14px;text-align:center}
+tr.base td{color:var(--muted)}
+/* band chart */
+.bands{display:grid;gap:8px}
+.brow{display:grid;grid-template-columns:78px minmax(0,1fr) 190px;gap:10px;align-items:center}
+.brow .lab{font-weight:650;font-variant-numeric:tabular-nums}
+.btrack{position:relative;height:22px;background:var(--panel2);border-radius:4px}
+.bfill{position:absolute;inset:0 auto 0 0;border-radius:4px}
+.bline{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--txt);opacity:.55}
+.bline.be{background:var(--good);opacity:.7}
+.btxt{position:absolute;left:8px;top:2px;font-weight:700;color:var(--ink);font-size:12.5px}
+.brow .meta{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+/* inputs table bar */
+.rbar{display:inline-block;height:10px;border-radius:3px;vertical-align:middle;margin-left:6px}
+.grp{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:4px;color:var(--ink);font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.wbar{display:flex;height:26px;border-radius:5px;overflow:hidden;font-size:11.5px;font-weight:650;color:var(--ink)}
+.wbar span{display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}
+ul.plain{margin:0;padding-left:18px;display:grid;gap:5px;color:#c9d4de;max-width:78ch}
+@media (max-width:640px){.brow{grid-template-columns:64px minmax(0,1fr)}.brow .meta{grid-column:2}}
+</style>
+
+<header><h1>🏀 NBA Backtest</h1><span class="date" id="hdr"></span><span style="flex:1"></span><nav style="display:flex;gap:12px;font-size:12.5px"><a href="index.html" style="color:var(--accent);text-decoration:none">Board</a><a href="monitor.html" style="color:var(--accent);text-decoration:none">Accuracy monitor</a></nav></header>
+<main>
+  <section>
+    <p class="lede" id="intro"></p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section>
+    <h2>What the schedule does</h2>
+    <p class="lede">This is the fatigue index's report card. Every schedule spot the board scores, with how the team actually did against the book's team total. "Book" is the implied team total from the closing spread and total; "Miss" is actual points minus that, so a negative miss means the book had the team too high. Under the line at 52.4% or better pays at −110. "Floor" is the 95% lower bound on the under rate, so a spot whose floor clears 50% is a signal rather than noise. "Game under" is the full-game total.</p>
+    <div class="panel scroll"><table id="spots"></table></div>
+    <p class="sub" id="spots-note" style="margin-top:8px"></p>
+  </section>
+
+  <section>
+    <h2>Does the projection beat the book?</h2>
+    <p class="lede">Edge is the book's number minus the board's projection. Positive edge means the book has the team (or game) higher than we do, so the under is the play. If the projection knows nothing the book doesn't, every row sits near 50%. At −110 you need 52.4% to break even, and the floor column tells you whether a bucket's hit rate could be luck.</p>
+    <div class="panel scroll"><h3>Team totals</h3><table id="edge-team"></table></div>
+    <div class="panel scroll" style="margin-top:10px"><h3>Game totals</h3><table id="edge-game"></table></div>
+    <p class="sub" id="edge-note" style="margin-top:8px"></p>
+  </section>
+
+  <section>
+    <h2>Which inputs predict points, and which predict what the market missed</h2>
+    <p class="lede">Each input tested on its own. "vs points" is its correlation with points scored: offense and pace score high here, but the book already prices season ratings, so that column mostly tells you what the market knows. "vs market miss" is the correlation with points minus the book line: that is the column that matters, because it is the only thing you can bet on. Basketball is noisy game to game, so 0.03–0.06 against the market is a real signal and 0.10 is large. The right column compares the fifth of games where the input most favoured the under with the fifth where it least did.</p>
+    <div class="legend"><span><i style="background:var(--team)"></i>Team's own offense</span><span><i style="background:var(--opp)"></i>Opponent</span><span><i style="background:var(--matchup)"></i>Matchup</span><span><i style="background:var(--spot)"></i>Situation</span><span><i style="background:var(--model)"></i>Model output</span></div>
+    <div class="panel scroll"><table id="inputs"></table></div>
+    <p class="sub" style="margin-top:8px">AUC is ranking accuracy for "went over the book line": 50% is a coin flip. Right column: under rate in the bottom vs top fifth of games for that input, or with vs without for yes/no situations.</p>
+  </section>
+
+  <section>
+    <h2>The board score and the projection, in fifths</h2>
+    <p class="lede">Every team-game sorted by the board's score (with the current weights) and by the projection, then cut into five equal groups. Group 1 is the lowest fifth. A working score shows the miss and the under rate falling as the group number rises.</p>
+    <div class="wgrid" id="comps"></div>
+  </section>
+
+  <section>
+    <h2>Score bands</h2>
+    <p class="lede">Every team-game sorted by its board score before tip-off. The bar shows how often the team stayed under the book's team total. The white line is the base rate across all games; the green line is 52.4%, break-even at −110. Red bands are your under spots.</p>
+    <div class="panel"><div class="bands" id="bands"></div></div>
+  </section>
+
+  <section id="rules-sec">
+    <h2>Rules: what happened at the extremes</h2>
+    <p class="lede" id="rules-lede"></p>
+    <div class="panel scroll"><h3>Team totals</h3><table id="rules-team"></table></div>
+    <div class="panel scroll" style="margin-top:10px"><h3>Game totals</h3><table id="rules-game"></table></div>
+    <p class="sub" id="rules-note" style="margin-top:8px"></p>
+  </section>
+
+  <section>
+    <h2>Weights: fitted vs current</h2>
+    <p class="lede" id="wlede"></p>
+    <div class="wgrid" id="wbars"></div>
+    <div class="panel scroll" style="margin-top:12px"><table id="wseason"></table></div>
+  </section>
+
+  <section>
+    <h2>Home court, rest and injuries: measured vs what the projection uses</h2>
+    <p class="lede">The projection turns ratings into points with a handful of multipliers from model.json. Here they are next to the sizes the backtest measured. A large gap means the projection is mis-sizing a spot and the learner will flag it.</p>
+    <div class="panel scroll"><table id="measured"></table></div>
+  </section>
+
+  <section>
+    <h2>Season by season</h2>
+    <p class="lede">Ranking accuracy against the book line: take one team-game that went over its line and one that went under. This is how often the method ranked the over game higher before tip-off. 50% is a coin flip. Because the book already knows the ratings, 55–60% here is good; the NHL board's goal-line numbers aren't comparable.</p>
+    <div class="panel scroll"><table id="seasons"></table></div>
+  </section>
+
+  <section>
+    <h2>Model history</h2>
+    <p class="lede" id="histlede"></p>
+    <div class="panel scroll"><table id="hist"></table></div>
+  </section>
+
+  <section>
+    <h2>How the test was run</h2>
+    <ul class="plain" id="method"></ul>
+  </section>
+</main>
+
+<script>
+const R={"n": 9842, "seasons": ["2022-23", "2023-24", "2024-25", "2025-26"], "current": "2026-27 (to date)", "current_n": 0, "data_through": "2026-04-12", "base_under": 0.4855, "base_pts": 114.57, "base_implied": 114.16, "sd_resid": 11.97, "ot_share": 0.0512, "ot_extra": 10.9, "inputs": [{"label": "Offense rating (ORtg)", "group": "team", "rho": 0.1765, "rho_resid": -0.02, "auc": 0.4926, "binary": false, "low_under": 0.4982, "high_under": 0.5226, "low_pts": 110.59, "high_pts": 117.34, "low_resid": 0.35, "high_resid": -0.36}, {"label": "Team Pts/G", "group": "team", "rho": 0.2176, "rho_resid": -0.0216, "auc": 0.4914, "binary": false, "low_under": 0.5013, "high_under": 0.5099, "low_pts": 110.12, "high_pts": 118.46, "low_resid": 0.41, "high_resid": -0.06}, {"label": "Pts L5", "group": "team", "rho": 0.19, "rho_resid": -0.0213, "auc": 0.4878, "binary": false, "low_under": 0.4913, "high_under": 0.5219, "low_pts": 110.62, "high_pts": 117.62, "low_resid": 0.33, "high_resid": -0.17}, {"label": "Opp DRtg", "group": "opp", "rho": 0.222, "rho_resid": -0.0007, "auc": 0.4996, "binary": false, "low_under": 0.4901, "high_under": 0.4942, "low_pts": 110.81, "high_pts": 119.13, "low_resid": 0.61, "high_resid": 0.53}, {"label": "Opp pts allowed/G", "group": "opp", "rho": 0.2669, "rho_resid": 0.0007, "auc": 0.4986, "binary": false, "low_under": 0.4937, "high_under": 0.4952, "low_pts": 109.92, "high_pts": 119.65, "low_resid": 0.61, "high_resid": 0.44}, {"label": "Expected possessions", "group": "matchup", "rho": 0.2225, "rho_resid": 0.0016, "auc": 0.4988, "binary": false, "low_under": 0.4901, "high_under": 0.5048, "low_pts": 110.42, "high_pts": 118.67, "low_resid": 0.37, "high_resid": 0.41}, {"label": "Team pace", "group": "team", "rho": 0.1115, "rho_resid": -0.0028, "auc": 0.4995, "binary": false, "low_under": 0.4992, "high_under": 0.5038, "low_pts": 112.3, "high_pts": 116.17, "low_resid": 0.5, "high_resid": 0.15}, {"label": "Opp pace", "group": "opp", "rho": 0.2027, "rho_resid": 0.0017, "auc": 0.4983, "binary": false, "low_under": 0.4911, "high_under": 0.5033, "low_pts": 111.21, "high_pts": 118.43, "low_resid": 0.63, "high_resid": 0.27}, {"label": "Fatigue index", "group": "spot", "rho": 0.0511, "rho_resid": 0.0113, "auc": 0.504, "binary": false, "low_under": 0.4952, "high_under": 0.4997, "low_pts": 113.67, "high_pts": 115.58, "low_resid": 0.48, "high_resid": 0.64}, {"label": "Opp fatigue index", "group": "spot", "rho": 0.0545, "rho_resid": 0.016, "auc": 0.5077, "binary": false, "low_under": 0.5089, "high_under": 0.487, "low_pts": 113.75, "high_pts": 115.54, "low_resid": 0.19, "high_resid": 0.76}, {"label": "Scoring share missing", "group": "spot", "rho": 0.1149, "rho_resid": -0.0028, "auc": 0.4969, "binary": false, "low_under": 0.5008, "high_under": 0.4982, "low_pts": 111.57, "high_pts": 115.88, "low_resid": 0.36, "high_resid": 0.43}, {"label": "Opp scoring share missing", "group": "spot", "rho": 0.0714, "rho_resid": 0.0085, "auc": 0.5035, "binary": false, "low_under": 0.4901, "high_under": 0.484, "low_pts": 113.37, "high_pts": 116.3, "low_resid": 0.54, "high_resid": 0.87}, {"label": "Home court", "group": "spot", "rho": 0.0772, "rho_resid": -0.001, "auc": 0.4979, "binary": true, "yes_pts": 115.57, "no_pts": 113.57, "yes_resid": 0.41, "no_resid": 0.41, "yes_under": 0.4879, "no_under": 0.483, "yes_n": 4921}, {"label": "Back-to-back", "group": "spot", "rho": 0.0401, "rho_resid": -0.0008, "auc": 0.4998, "binary": true, "yes_pts": 113.52, "no_pts": 114.8, "yes_resid": 0.46, "no_resid": 0.4, "yes_under": 0.4857, "no_under": 0.4854, "yes_n": 1713}, {"label": "Opp back-to-back", "group": "spot", "rho": 0.0318, "rho_resid": 0.0125, "auc": 0.5054, "binary": true, "yes_pts": 115.41, "no_pts": 114.4, "yes_resid": 0.76, "no_resid": 0.34, "yes_under": 0.4723, "no_under": 0.4883, "yes_n": 1713}, {"label": "3 games in 4 days", "group": "spot", "rho": 0.0383, "rho_resid": 0.0138, "auc": 0.5052, "binary": false, "low_under": 0.5063, "high_under": 0.4865, "low_pts": 114.17, "high_pts": 114.56, "low_resid": 0.36, "high_resid": 0.88}, {"label": "Rest days", "group": "spot", "rho": 0.0468, "rho_resid": 0.0061, "auc": 0.5037, "binary": false, "low_under": 0.4982, "high_under": 0.4891, "low_pts": 113.95, "high_pts": 115.4, "low_resid": 0.43, "high_resid": 0.71}, {"label": "Road trip game #", "group": "spot", "rho": 0.0731, "rho_resid": 0.0031, "auc": 0.5002, "binary": false, "low_under": 0.5043, "high_under": 0.4886, "low_pts": 113.65, "high_pts": 115.26, "low_resid": 0.43, "high_resid": 0.6}, {"label": "Travel km", "group": "spot", "rho": 0.0402, "rho_resid": 0.0234, "auc": 0.5099, "binary": false, "low_under": 0.5109, "high_under": 0.4825, "low_pts": 113.96, "high_pts": 115.58, "low_resid": 0.14, "high_resid": 0.75}, {"label": "Time zones crossed", "group": "spot", "rho": 0.0107, "rho_resid": 0.0198, "auc": 0.5074, "binary": false, "low_under": 0.5084, "high_under": 0.4957, "low_pts": 114.67, "high_pts": 113.52, "low_resid": 0.26, "high_resid": 0.25}, {"label": "Visiting altitude", "group": "spot", "rho": -0.0244, "rho_resid": -0.0129, "auc": 0.4985, "binary": true, "yes_pts": 116.46, "no_pts": 114.51, "yes_resid": 1.16, "no_resid": 0.38, "yes_under": 0.4592, "no_under": 0.4864, "yes_n": 331}, {"label": "Projected points", "group": "model", "rho": 0.3724, "rho_resid": -0.0095, "auc": 0.4943, "binary": false, "low_under": 0.4962, "high_under": 0.5084, "low_pts": 107.71, "high_pts": 121.29, "low_resid": 0.61, "high_resid": 0.1}, {"label": "Edge (book \u2212 proj)", "group": "model", "rho": -0.2619, "rho_resid": -0.0157, "auc": 0.4963, "binary": false, "low_under": 0.4972, "high_under": 0.5023, "low_pts": 119.33, "high_pts": 109.65, "low_resid": 0.47, "high_resid": 0.51}], "spots": [{"label": "All team-games", "n": 9842, "share": 1.0, "pts": 114.57, "implied": 114.16, "resid": 0.41, "under": 0.4855, "under_lo": 0.4756, "game_under": 0.4895, "pace": 102.07}, {"label": "Back-to-back", "n": 1713, "share": 0.174, "pts": 113.52, "implied": 113.06, "resid": 0.46, "under": 0.4857, "under_lo": 0.4621, "game_under": 0.488, "pace": 101.81}, {"label": "Back-to-back, away", "n": 911, "share": 0.0926, "pts": 112.6, "implied": 111.85, "resid": 0.75, "under": 0.4731, "under_lo": 0.4409, "game_under": 0.4962, "pace": 101.89}, {"label": "Back-to-back, home", "n": 802, "share": 0.0815, "pts": 114.56, "implied": 114.44, "resid": 0.12, "under": 0.5, "under_lo": 0.4655, "game_under": 0.4788, "pace": 101.72}, {"label": "3rd game in 4 days", "n": 2547, "share": 0.2588, "pts": 113.8, "implied": 113.64, "resid": 0.16, "under": 0.4916, "under_lo": 0.4722, "game_under": 0.4908, "pace": 101.77}, {"label": "4th+ game in 7 days", "n": 6303, "share": 0.6404, "pts": 114.39, "implied": 114.02, "resid": 0.37, "under": 0.4828, "under_lo": 0.4705, "game_under": 0.4866, "pace": 101.73}, {"label": "Road game 3+ of a trip", "n": 1482, "share": 0.1506, "pts": 113.8, "implied": 113.35, "resid": 0.45, "under": 0.4899, "under_lo": 0.4645, "game_under": 0.4784, "pace": 101.84}, {"label": "Road game 4+ of a trip", "n": 720, "share": 0.0732, "pts": 113.59, "implied": 113.26, "resid": 0.33, "under": 0.4986, "under_lo": 0.4622, "game_under": 0.4792, "pace": 101.82}, {"label": "Travelled 2,000+ km", "n": 988, "share": 0.1004, "pts": 114.6, "implied": 114.05, "resid": 0.55, "under": 0.4919, "under_lo": 0.4608, "game_under": 0.501, "pace": 102.29}, {"label": "Crossed 2+ time zones", "n": 844, "share": 0.0858, "pts": 114.26, "implied": 114.09, "resid": 0.17, "under": 0.5059, "under_lo": 0.4722, "game_under": 0.5107, "pace": 102.34}, {"label": "Visiting Denver / Utah", "n": 331, "share": 0.0336, "pts": 116.46, "implied": 115.3, "resid": 1.16, "under": 0.4592, "under_lo": 0.4063, "game_under": 0.4411, "pace": 102.9}, {"label": "3+ days rest", "n": 1983, "share": 0.2015, "pts": 115.44, "implied": 114.72, "resid": 0.72, "under": 0.475, "under_lo": 0.4531, "game_under": 0.4836, "pace": 102.71}, {"label": "Rested (2+ days) vs tired opp (B2B)", "n": 1207, "share": 0.1226, "pts": 115.97, "implied": 114.89, "resid": 1.08, "under": 0.464, "under_lo": 0.436, "game_under": 0.4822, "pace": 101.8}, {"label": "Tired (B2B) vs rested opp (2+ days)", "n": 1207, "share": 0.1226, "pts": 113.28, "implied": 112.63, "resid": 0.65, "under": 0.483, "under_lo": 0.4549, "game_under": 0.4822, "pace": 101.8}, {"label": "Fatigue index 30+", "n": 3523, "share": 0.358, "pts": 113.94, "implied": 113.67, "resid": 0.26, "under": 0.4885, "under_lo": 0.472, "game_under": 0.4874, "pace": 101.88}, {"label": "Fatigue index 50+", "n": 1774, "share": 0.1802, "pts": 113.6, "implied": 113.07, "resid": 0.53, "under": 0.482, "under_lo": 0.4588, "game_under": 0.4797, "pace": 101.76}, {"label": "Fatigue 30+ and opp rested", "n": 757, "share": 0.0769, "pts": 113.35, "implied": 113.04, "resid": 0.31, "under": 0.5152, "under_lo": 0.4796, "game_under": 0.4941, "pace": 102.32}, {"label": "Missing 15%+ of scoring", "n": 5378, "share": 0.5464, "pts": 113.48, "implied": 113.0, "resid": 0.48, "under": 0.4833, "under_lo": 0.4699, "game_under": 0.487, "pace": 101.95}, {"label": "Missing 25%+ of scoring", "n": 3362, "share": 0.3416, "pts": 112.53, "implied": 112.14, "resid": 0.38, "under": 0.486, "under_lo": 0.4692, "game_under": 0.4911, "pace": 101.98}, {"label": "Opp missing 15%+ of scoring", "n": 5378, "share": 0.5464, "pts": 115.23, "implied": 114.67, "resid": 0.56, "under": 0.4807, "under_lo": 0.4673, "game_under": 0.487, "pace": 101.95}, {"label": "Went to overtime", "n": 504, "share": 0.0512, "pts": 124.91, "implied": 113.97, "resid": 10.95, "under": 0.123, "under_lo": 0.0972, "game_under": 0.123, "pace": 112.08}], "composites": [{"label": "Board score (current weights)", "auc": 0.494, "auc_lg": 0.6688, "rho": 0.3683, "rho_resid": -0.0064, "quintiles": [{"q": 1, "pts": 107.93, "resid": 0.59, "over": 0.5084, "n": 1969}, {"q": 2, "pts": 111.8, "resid": 0.31, "over": 0.5061, "n": 1968}, {"q": 3, "pts": 114.52, "resid": 0.44, "over": 0.501, "n": 1968}, {"q": 4, "pts": 117.44, "resid": 0.59, "over": 0.499, "n": 1968}, {"q": 5, "pts": 121.17, "resid": 0.13, "over": 0.4906, "n": 1969}]}, {"label": "Projected points", "auc": 0.4943, "auc_lg": 0.6698, "rho": 0.3724, "rho_resid": -0.0095, "quintiles": [{"q": 1, "pts": 107.71, "resid": 0.61, "over": 0.5038, "n": 1969}, {"q": 2, "pts": 111.92, "resid": 0.39, "over": 0.5158, "n": 1968}, {"q": 3, "pts": 114.53, "resid": 0.45, "over": 0.4959, "n": 1968}, {"q": 4, "pts": 117.41, "resid": 0.51, "over": 0.498, "n": 1968}, {"q": 5, "pts": 121.29, "resid": 0.1, "over": 0.4916, "n": 1969}]}], "deciles": [{"d": 1, "pts": 106.12, "resid": 0.37, "under": 0.4802, "lo": 6.3, "hi": 32.1}, {"d": 2, "pts": 109.75, "resid": 0.81, "under": 0.4736, "lo": 32.1, "hi": 38.2}, {"d": 3, "pts": 111.17, "resid": 0.29, "under": 0.4736, "lo": 38.2, "hi": 42.7}, {"d": 4, "pts": 112.43, "resid": 0.34, "under": 0.4878, "lo": 42.7, "hi": 46.7}, {"d": 5, "pts": 113.91, "resid": 0.48, "under": 0.4797, "lo": 46.7, "hi": 50.4}, {"d": 6, "pts": 115.13, "resid": 0.39, "under": 0.4878, "lo": 50.4, "hi": 53.9}, {"d": 7, "pts": 116.22, "resid": 0.08, "under": 0.503, "lo": 53.9, "hi": 57.8}, {"d": 8, "pts": 118.67, "resid": 1.09, "under": 0.4776, "lo": 57.8, "hi": 62.4}, {"d": 9, "pts": 120.04, "resid": 0.54, "under": 0.4888, "lo": 62.4, "hi": 68.7}, {"d": 10, "pts": 122.3, "resid": -0.28, "under": 0.5025, "lo": 68.8, "hi": 94.7}], "bands": [{"band": "<30", "pts": 105.67, "resid": 0.42, "under": 0.4802, "n": 756}, {"band": "30-40", "pts": 109.66, "resid": 0.57, "under": 0.4763, "n": 1602}, {"band": "40-50", "pts": 112.65, "resid": 0.34, "under": 0.4856, "n": 2469}, {"band": "50-60", "pts": 116.23, "resid": 0.54, "under": 0.4873, "n": 2551}, {"band": "60-70", "pts": 119.71, "resid": 0.55, "under": 0.4859, "n": 1630}, {"band": "70+", "pts": 122.65, "resid": -0.34, "under": 0.5012, "n": 834}], "edge_table": [{"edge": "\u2264\u22126", "n": 203, "under": 0.4631, "under_lo": 0.3958, "resid": 0.57, "pts": 107.6, "proj": 114.51, "implied": 107.03}, {"edge": "\u22126\u2026\u22124", "n": 482, "under": 0.4668, "under_lo": 0.4227, "resid": 0.06, "pts": 108.55, "proj": 113.31, "implied": 108.49}, {"edge": "\u22124\u2026\u22122", "n": 1310, "under": 0.5015, "under_lo": 0.4745, "resid": -0.14, "pts": 110.33, "proj": 113.37, "implied": 110.47}, {"edge": "\u22122\u20260", "n": 2283, "under": 0.495, "under_lo": 0.4745, "resid": 0.01, "pts": 112.86, "proj": 113.76, "implied": 112.85}, {"edge": "0\u20262", "n": 2638, "under": 0.4731, "under_lo": 0.4541, "resid": 0.65, "pts": 115.5, "proj": 113.84, "implied": 114.84}, {"edge": "2\u20264", "n": 1844, "under": 0.5005, "under_lo": 0.4777, "resid": 0.23, "pts": 117.14, "proj": 114.03, "implied": 116.91}, {"edge": "4\u20266", "n": 781, "under": 0.4661, "under_lo": 0.4313, "resid": 0.8, "pts": 120.1, "proj": 114.47, "implied": 119.3}, {"edge": "6+", "n": 295, "under": 0.4644, "under_lo": 0.4083, "resid": 0.91, "pts": 122.4, "proj": 114.13, "implied": 121.5}], "game_edge_table": [{"edge": "\u2264\u22128", "n": 238, "under": 0.479, "under_lo": 0.4164, "total": 215.41, "proj": 226.03, "actual": 216.18}, {"edge": "\u22128\u2026\u22125", "n": 390, "under": 0.5154, "under_lo": 0.4659, "total": 219.56, "proj": 225.91, "actual": 218.84}, {"edge": "\u22125\u2026\u22122.5", "n": 599, "under": 0.5025, "under_lo": 0.4626, "total": 222.35, "proj": 226.03, "actual": 222.39}, {"edge": "\u22122.5\u20260", "n": 811, "under": 0.4932, "under_lo": 0.4589, "total": 225.0, "proj": 226.19, "actual": 225.52}, {"edge": "0\u20262.5", "n": 898, "under": 0.4722, "under_lo": 0.4397, "total": 228.73, "proj": 227.47, "actual": 229.73}, {"edge": "2.5\u20265", "n": 849, "under": 0.4841, "under_lo": 0.4506, "total": 231.84, "proj": 228.11, "actual": 231.94}, {"edge": "5\u20268", "n": 686, "under": 0.5029, "under_lo": 0.4656, "total": 235.38, "proj": 229.04, "actual": 236.91}, {"edge": "8+", "n": 447, "under": 0.4765, "under_lo": 0.4306, "total": 240.83, "proj": 230.55, "actual": 242.28}], "game_n": 4921, "game_base_under": 0.4895, "game_sd": 18.87, "team_sd": 11.66, "proj_bias": 0.73, "game_rho_resid": -0.0207, "measured": {"home": 1.0091, "away": 0.987, "fatigueK": 0.0355, "oppFatigueK": 0.0249, "availK": 0.083, "sdTeam": 11.66, "sdGame": 18.87}, "coef": {"off": 0.885, "def": 1.022, "pace": 1.17, "fatigue": 0.229, "oppFatigue": 0.225, "avail": 0.477, "l5": 0.501}, "fitted_w": {"off": 0.196, "def": 0.227, "pace": 0.26, "fatigue": 0.051, "oppFatigue": 0.05, "avail": 0.106, "l5": 0.111}, "per_season_w": {"2022-23": {"off": 0.211, "def": 0.277, "pace": 0.251, "fatigue": 0.065, "oppFatigue": 0.066, "avail": 0.13, "l5": 0.0}, "2023-24": {"off": 0.162, "def": 0.221, "pace": 0.253, "fatigue": 0.043, "oppFatigue": 0.064, "avail": 0.073, "l5": 0.185}, "2024-25": {"off": 0.197, "def": 0.271, "pace": 0.218, "fatigue": 0.035, "oppFatigue": 0.047, "avail": 0.066, "l5": 0.167}, "2025-26": {"off": 0.154, "def": 0.327, "pace": 0.25, "fatigue": 0.059, "oppFatigue": 0.059, "avail": 0.11, "l5": 0.042}}, "suggested_w": {"off": 0.2, "def": 0.25, "pace": 0.25, "fatigue": 0.05, "oppFatigue": 0.05, "avail": 0.1, "l5": 0.1}, "test": {"season": "2025-26", "n": 2460, "default_auc": 0.6685, "fitted_auc": 0.6685, "proj_auc": 0.6705, "default_mkt": 0.4928, "fitted_mkt": 0.4928, "edge_mkt": 0.4976, "default_q": [{"q": 1, "pts": 109.13, "resid": 0.32, "over": 0.498, "n": 492}, {"q": 2, "pts": 112.69, "resid": 0.12, "over": 0.5061, "n": 492}, {"q": 3, "pts": 115.39, "resid": 0.27, "over": 0.502, "n": 492}, {"q": 4, "pts": 118.02, "resid": -0.04, "over": 0.4898, "n": 492}, {"q": 5, "pts": 122.78, "resid": 0.55, "over": 0.5, "n": 492}], "fitted_q": [{"q": 1, "pts": 109.13, "resid": 0.32, "over": 0.498, "n": 492}, {"q": 2, "pts": 112.69, "resid": 0.12, "over": 0.5061, "n": 492}, {"q": 3, "pts": 115.39, "resid": 0.27, "over": 0.502, "n": 492}, {"q": 4, "pts": 118.02, "resid": -0.04, "over": 0.4898, "n": 492}, {"q": 5, "pts": 122.78, "resid": 0.55, "over": 0.5, "n": 492}]}, "by_season": [{"season": "2022-23", "n": 2460, "board": 0.6388, "board_mkt": 0.4654, "edge": 0.5139, "under": 0.4846, "pts": 114.69, "resid": 0.93, "new": 0.6388}, {"season": "2023-24", "n": 2462, "board": 0.6894, "board_mkt": 0.5061, "edge": 0.493, "under": 0.4878, "pts": 114.21, "resid": 0.12, "new": 0.6894}, {"season": "2024-25", "n": 2460, "board": 0.6904, "board_mkt": 0.5097, "edge": 0.482, "under": 0.487, "pts": 113.79, "resid": 0.35, "new": 0.6904}, {"season": "2025-26", "n": 2460, "board": 0.6685, "board_mkt": 0.4928, "edge": 0.4976, "under": 0.4825, "pts": 115.6, "resid": 0.24, "new": 0.6685}], "proj_slope": 1.004, "auc_lg_all": 0.6688, "auc_mkt_all": 0.494, "rules": {"seasons": ["2022-23", "2023-24", "2024-25", "2025-26"], "test": "2025-26", "team_n": 9842, "game_n": 4921, "rows": [{"label": "All team totals", "kind": "team", "side": "all", "n": 9842, "under": 0.4855, "under_lo": 0.4756, "resid": 0.41, "test_n": 2460, "test_under": 0.4825, "share": 1.0}, {"label": "Team score under 25", "kind": "team", "side": "under", "n": 334, "under": 0.488, "under_lo": 0.4349, "resid": 0.52, "test_n": 73, "test_under": 0.5068, "share": 0.0339}, {"label": "Team score under 30", "kind": "team", "side": "under", "n": 756, "under": 0.4802, "under_lo": 0.4447, "resid": 0.42, "test_n": 165, "test_under": 0.4485, "share": 0.0768}, {"label": "Team score under 35", "kind": "team", "side": "under", "n": 1414, "under": 0.4802, "under_lo": 0.4542, "resid": 0.59, "test_n": 330, "test_under": 0.4606, "share": 0.1437}, {"label": "Team score 65 or higher", "kind": "team", "side": "over", "n": 1501, "under": 0.4943, "under_lo": 0.4804, "resid": 0.13, "test_n": 272, "test_under": 0.4816, "share": 0.1525}, {"label": "Team score 70 or higher", "kind": "team", "side": "over", "n": 834, "under": 0.5012, "under_lo": 0.4649, "resid": -0.34, "test_n": 131, "test_under": 0.4809, "share": 0.0847}, {"label": "Team score 75 or higher", "kind": "team", "side": "over", "n": 415, "under": 0.4651, "under_lo": 0.4869, "resid": 0.34, "test_n": 53, "test_under": 0.4528, "share": 0.0422}, {"label": "Edge 2+ toward the under", "kind": "team", "side": "under", "n": 2920, "under": 0.4877, "under_lo": 0.4696, "resid": 0.45, "test_n": 646, "test_under": 0.4752, "share": 0.2967}, {"label": "Edge 3+ toward the under", "kind": "team", "side": "under", "n": 1829, "under": 0.4817, "under_lo": 0.4588, "resid": 0.54, "test_n": 411, "test_under": 0.4599, "share": 0.1858}, {"label": "Edge 4+ toward the under", "kind": "team", "side": "under", "n": 1076, "under": 0.4656, "under_lo": 0.436, "resid": 0.83, "test_n": 261, "test_under": 0.4406, "share": 0.1093}, {"label": "Edge 6+ toward the under", "kind": "team", "side": "under", "n": 295, "under": 0.4644, "under_lo": 0.4083, "resid": 0.91, "test_n": 82, "test_under": 0.439, "share": 0.03}, {"label": "Edge 3+ and score under 40", "kind": "team", "side": "under", "n": 327, "under": 0.4985, "under_lo": 0.4446, "resid": 0.06, "test_n": 86, "test_under": 0.5, "share": 0.0332}, {"label": "Edge 3+ on a back-to-back", "kind": "team", "side": "under", "n": 388, "under": 0.4691, "under_lo": 0.42, "resid": 0.93, "test_n": 85, "test_under": 0.4588, "share": 0.0394}, {"label": "Edge 3+ and fatigue 30+", "kind": "team", "side": "under", "n": 812, "under": 0.484, "under_lo": 0.4498, "resid": 0.26, "test_n": 178, "test_under": 0.427, "share": 0.0825}, {"label": "Edge 3+ toward the over", "kind": "team", "side": "over", "n": 1255, "under": 0.4661, "under_lo": 0.5062, "resid": 1.14, "test_n": 352, "test_under": 0.4489, "share": 0.1275}, {"label": "All games", "kind": "game", "side": "all", "n": 4921, "under": 0.4895, "under_lo": 0.4756, "resid": 0.82, "test_n": 1230, "test_under": 0.5065, "share": 1.0}, {"label": "Combined under 60", "kind": "game", "side": "under", "n": 116, "under": 0.5, "under_lo": 0.4105, "resid": 0.19, "test_n": 14, "test_under": 0.2857, "share": 0.0236}, {"label": "Combined under 70", "kind": "game", "side": "under", "n": 388, "under": 0.4923, "under_lo": 0.4428, "resid": 0.78, "test_n": 66, "test_under": 0.4848, "share": 0.0788}, {"label": "Combined under 80", "kind": "game", "side": "under", "n": 840, "under": 0.4845, "under_lo": 0.4509, "resid": 0.97, "test_n": 179, "test_under": 0.4804, "share": 0.1707}, {"label": "Combined 120 or higher", "kind": "game", "side": "over", "n": 892, "under": 0.4955, "under_lo": 0.4717, "resid": 0.02, "test_n": 135, "test_under": 0.5111, "share": 0.1813}, {"label": "Combined 130 or higher", "kind": "game", "side": "over", "n": 407, "under": 0.5061, "under_lo": 0.4456, "resid": 0.01, "test_n": 34, "test_under": 0.5588, "share": 0.0827}, {"label": "Game edge 3+ toward the under", "kind": "game", "side": "under", "n": 1810, "under": 0.484, "under_lo": 0.461, "resid": 1.07, "test_n": 420, "test_under": 0.4952, "share": 0.3678}, {"label": "Game edge 5+ toward the under", "kind": "game", "side": "under", "n": 1133, "under": 0.4925, "under_lo": 0.4635, "resid": 1.49, "test_n": 250, "test_under": 0.492, "share": 0.2302}, {"label": "Game edge 8+ toward the under", "kind": "game", "side": "under", "n": 447, "under": 0.4765, "under_lo": 0.4306, "resid": 1.44, "test_n": 97, "test_under": 0.4742, "share": 0.0908}, {"label": "Game edge 5+ toward the over", "kind": "game", "side": "over", "n": 631, "under": 0.4992, "under_lo": 0.4619, "resid": 1.46, "test_n": 147, "test_under": 0.5714, "share": 0.1282}], "dist": {"team": [32.1, 40.6, 50.4, 60.0, 68.8], "game": [72.8, 86.1, 100.8, 115.5, 127.9]}}, "model": {"version": 1, "updated": "2026-10-16", "note": "Weights fit by backtest/backtest.py on points vs league average; learn.py updates them weekly when the guardrails pass. fatigue.* are the points each schedule spot adds to the 0-100 fatigue index. projection.*: fatigueK = share of points a fully tired team (index 100) loses; oppFatigueK = share gained against a fully tired defense; availK = points lost per unit of scoring share missing beyond the typical availBase; shrink = how much of the raw projection's spread is kept (fit as the slope of actual on projected); sdTeam/sdGame = spread of actual points around the projection, for under chances.", "weights": {"off": 0.2, "def": 0.25, "pace": 0.25, "fatigue": 0.05, "oppFatigue": 0.05, "avail": 0.1, "l5": 0.1}, "fatigue": {"b2b": 40, "threeInFour": 20, "fourInSeven": 10, "tripGame": 5, "travel": 5, "tz": 5, "altitude": 10, "restBonus": 10}, "projection": {"home": 1.006, "away": 0.988, "fatigueK": 0.03, "oppFatigueK": 0.021, "availK": 0.08, "availBase": 0.17, "shrink": 0.82, "gameShrink": 0.82, "sdTeam": 11.7, "sdGame": 19.0, "otShare": 0.051}, "priorGames": 15, "expect": {"auc_low": 0.63, "auc_high": 0.68, "auc_all": 0.655, "base_pts": 114.6, "base_under_implied": 0.486}, "history": [{"version": 1, "date": "2026-10-16", "weights": {"off": 0.2, "def": 0.25, "pace": 0.25, "fatigue": 0.05, "oppFatigue": 0.05, "avail": 0.1, "l5": 0.1}, "why": "First backtest (2022-23 to 2025-26, 9,842 team-games): offense, opponent defense and pace carry most of the ranking of points vs league average; rest and availability add a little; nothing beats the closing line on its own."}]}, "prev_weights": {"off": 0.2, "def": 0.25, "pace": 0.25, "fatigue": 0.05, "oppFatigue": 0.05, "avail": 0.1, "l5": 0.1}, "learn": {"date": "2026-10-16", "data_through": "2026-04-12", "current_n": 0, "model_version": 1, "current": {"off": 0.2, "def": 0.25, "pace": 0.25, "fatigue": 0.05, "oppFatigue": 0.05, "avail": 0.1, "l5": 0.1}, "target": {"off": 0.15, "def": 0.25, "pace": 0.25, "fatigue": 0.05, "oppFatigue": 0.05, "avail": 0.1, "l5": 0.15}, "candidate": {"off": 0.15, "def": 0.25, "pace": 0.25, "fatigue": 0.05, "oppFatigue": 0.05, "avail": 0.1, "l5": 0.15}, "metrics": {"val_n": 0, "val_cur": null, "val_new": null, "val_target": null, "prev_cur": 0.6685, "prev_new": 0.6666}, "measured": {"home": 1.0091, "away": 0.987, "fatigueK": 0.0355, "oppFatigueK": 0.0249, "availK": 0.083, "sdTeam": 11.66, "sdGame": 18.87}, "decision": "waiting", "reason": "Only 0 team-games played this season; changes need 500. The fit is shown for reference.", "alerts": []}, "bands_new": [{"band": "Under 30", "pts": 105.67, "resid": 0.42, "under": 0.4802, "n": 756}, {"band": "30\u201340", "pts": 109.66, "resid": 0.57, "under": 0.4763, "n": 1602}, {"band": "40\u201350", "pts": 112.65, "resid": 0.34, "under": 0.4856, "n": 2469}, {"band": "50\u201360", "pts": 116.23, "resid": 0.54, "under": 0.4873, "n": 2551}, {"band": "60\u201370", "pts": 119.71, "resid": 0.55, "under": 0.4859, "n": 1630}, {"band": "70+", "pts": 122.65, "resid": -0.34, "under": 0.5012, "n": 834}], "auc_new_all": 0.6688, "auc_new_mkt": 0.494, "situational": [{"label": "All team-games", "n": 9842, "share": 1.0, "pts": 114.57, "implied": 114.16, "resid": 0.41, "under": 0.4855, "under_lo": 0.4756, "game_under": 0.4895, "pace": 102.07}, {"label": "Back-to-back", "n": 1713, "share": 0.174, "pts": 113.52, "implied": 113.06, "resid": 0.46, "under": 0.4857, "under_lo": 0.4621, "game_under": 0.488, "pace": 101.81}, {"label": "Back-to-back, away", "n": 911, "share": 0.0926, "pts": 112.6, "implied": 111.85, "resid": 0.75, "under": 0.4731, "under_lo": 0.4409, "game_under": 0.4962, "pace": 101.89}, {"label": "Back-to-back, home", "n": 802, "share": 0.0815, "pts": 114.56, "implied": 114.44, "resid": 0.12, "under": 0.5, "under_lo": 0.4655, "game_under": 0.4788, "pace": 101.72}, {"label": "3rd game in 4 days", "n": 2547, "share": 0.2588, "pts": 113.8, "implied": 113.64, "resid": 0.16, "under": 0.4916, "under_lo": 0.4722, "game_under": 0.4908, "pace": 101.77}, {"label": "4th+ game in 7 days", "n": 6303, "share": 0.6404, "pts": 114.39, "implied": 114.02, "resid": 0.37, "under": 0.4828, "under_lo": 0.4705, "game_under": 0.4866, "pace": 101.73}, {"label": "Road game 3+ of a trip", "n": 1482, "share": 0.1506, "pts": 113.8, "implied": 113.35, "resid": 0.45, "under": 0.4899, "under_lo": 0.4645, "game_under": 0.4784, "pace": 101.84}, {"label": "Road game 4+ of a trip", "n": 720, "share": 0.0732, "pts": 113.59, "implied": 113.26, "resid": 0.33, "under": 0.4986, "under_lo": 0.4622, "game_under": 0.4792, "pace": 101.82}, {"label": "Travelled 2,000+ km", "n": 988, "share": 0.1004, "pts": 114.6, "implied": 114.05, "resid": 0.55, "under": 0.4919, "under_lo": 0.4608, "game_under": 0.501, "pace": 102.29}, {"label": "Crossed 2+ time zones", "n": 844, "share": 0.0858, "pts": 114.26, "implied": 114.09, "resid": 0.17, "under": 0.5059, "under_lo": 0.4722, "game_under": 0.5107, "pace": 102.34}, {"label": "Visiting Denver / Utah", "n": 331, "share": 0.0336, "pts": 116.46, "implied": 115.3, "resid": 1.16, "under": 0.4592, "under_lo": 0.4063, "game_under": 0.4411, "pace": 102.9}, {"label": "3+ days rest", "n": 1983, "share": 0.2015, "pts": 115.44, "implied": 114.72, "resid": 0.72, "under": 0.475, "under_lo": 0.4531, "game_under": 0.4836, "pace": 102.71}, {"label": "Rested (2+ days) vs tired opp (B2B)", "n": 1207, "share": 0.1226, "pts": 115.97, "implied": 114.89, "resid": 1.08, "under": 0.464, "under_lo": 0.436, "game_under": 0.4822, "pace": 101.8}, {"label": "Tired (B2B) vs rested opp (2+ days)", "n": 1207, "share": 0.1226, "pts": 113.28, "implied": 112.63, "resid": 0.65, "under": 0.483, "under_lo": 0.4549, "game_under": 0.4822, "pace": 101.8}, {"label": "Fatigue index 30+", "n": 3523, "share": 0.358, "pts": 113.94, "implied": 113.67, "resid": 0.26, "under": 0.4885, "under_lo": 0.472, "game_under": 0.4874, "pace": 101.88}, {"label": "Fatigue index 50+", "n": 1774, "share": 0.1802, "pts": 113.6, "implied": 113.07, "resid": 0.53, "under": 0.482, "under_lo": 0.4588, "game_under": 0.4797, "pace": 101.76}, {"label": "Fatigue 30+ and opp rested", "n": 757, "share": 0.0769, "pts": 113.35, "implied": 113.04, "resid": 0.31, "under": 0.5152, "under_lo": 0.4796, "game_under": 0.4941, "pace": 102.32}, {"label": "Missing 15%+ of scoring", "n": 5378, "share": 0.5464, "pts": 113.48, "implied": 113.0, "resid": 0.48, "under": 0.4833, "under_lo": 0.4699, "game_under": 0.487, "pace": 101.95}, {"label": "Missing 25%+ of scoring", "n": 3362, "share": 0.3416, "pts": 112.53, "implied": 112.14, "resid": 0.38, "under": 0.486, "under_lo": 0.4692, "game_under": 0.4911, "pace": 101.98}, {"label": "Opp missing 15%+ of scoring", "n": 5378, "share": 0.5464, "pts": 115.23, "implied": 114.67, "resid": 0.56, "under": 0.4807, "under_lo": 0.4673, "game_under": 0.487, "pace": 101.95}, {"label": "Went to overtime", "n": 504, "share": 0.0512, "pts": 124.91, "implied": 113.97, "resid": 10.95, "under": 0.123, "under_lo": 0.0972, "game_under": 0.123, "pace": 112.08}]};
+const $=s=>document.querySelector(s);
+const pct=(v,d=0)=>v==null||isNaN(v)?'—':(v*100).toFixed(d)+'%';
+const f1=v=>v==null||isNaN(v)?'—':(+v).toFixed(1);
+const f2=v=>v==null||isNaN(v)?'—':(+v).toFixed(2);
+const f3=v=>v==null||isNaN(v)?'—':(v>=0?'+':'')+(+v).toFixed(3);
+const num=v=>v==null?'—':(+v).toLocaleString();
+const sgn=(v,d=1)=>v==null||isNaN(v)?'—':`<span class="${v<0?'neg':v>0?'pos':''}">${v>0?'+':''}${(+v).toFixed(d)}</span>`;
+const heat=v=>`hsl(${Math.max(0,Math.min(100,v))*1.2} 62% 46%)`;
+const BE=0.524;
+const hit=(p,n)=>p==null?'—':`<span class="pill ${n!=null&&n<30?'p-mute':p>=BE?'p-good':p>=0.5?'p-warn':'p-bad'}">${pct(p,1)}</span>`;
+const GRP={team:'var(--team)',opp:'var(--opp)',matchup:'var(--matchup)',spot:'var(--spot)',model:'var(--model)'};
+const GL={team:'Team',opp:'Opp',matchup:'Matchup',spot:'Spot',model:'Model'};
+const WL={off:'Offense',def:'Opp D',pace:'Pace',fatigue:'Rest',oppFatigue:'Opp rest',avail:'Avail',l5:'L5'};
+const WC={off:'var(--team)',def:'var(--opp)',pace:'var(--matchup)',fatigue:'var(--spot)',oppFatigue:'#d9a85c',avail:'#6c8db8',l5:'#8fb3a5'};
+const WK=Object.keys(WL);
+const empty=(t='No backtest results yet.')=>`<tr><td class="empty">${t}</td></tr>`;
+const sec=(fn,id)=>{try{fn()}catch(e){console.warn(id,e);const el=id&&$(id);if(el)el.innerHTML=el.tagName==='TABLE'?empty('Not available in this run.'):'<div class="empty">Not available in this run.</div>'}};
+
+if(!R||!R.n){
+  $('#hdr').textContent='no results yet';
+  $('#intro').textContent='The backtest has not run yet. The weekly GitHub Action runs backtest.py, rules.py, learn.py and report.py; this page fills in after the first run.';
+  for(const id of ['spots','edge-team','edge-game','inputs','rules-team','rules-game','wseason','measured','seasons','hist']) $('#'+id).innerHTML=empty();
+  throw new Error('no data');
+}
+const seasons=R.seasons||[], first=seasons[0]||'—', last=seasons[seasons.length-1]||'—';
+const base=R.base_under, model=R.model||{}, W=model.weights||{}, PJ=model.projection||{};
+
+$('#hdr').textContent=`${num(R.n)} team-games · ${first} to ${last}${R.data_through?' · through '+R.data_through:''}`;
+$('#intro').textContent=`Every regular-season team-game from ${first} through ${last} was replayed day by day. Each team's ratings, pace, schedule spot and missing scorers were rebuilt using only games played before that date, plus last season counted as ${model.priorGames||15} games, the same way the live board does it. The target is not points: it is whether the team finished under the book's closing team total. The book already prices offense, defense and pace, so the question is what the board knows that the line doesn't.`;
+
+/* headline cards */
+sec(()=>{
+  $('#cards').innerHTML=[
+   ['Team-games',num(R.n),`${seasons.length} season${seasons.length===1?'':'s'}: ${seasons.join(', ')}.${R.current_n?` ${num(R.current_n)} so far in ${R.current}.`:''}`],
+   ['Base under rate',pct(base,1),`Share of team-games that finished under the book's implied team total. The book aims for 50%; 52.4% is break-even at −110. Game totals: ${pct(R.game_base_under,1)} under over ${num(R.game_n)} games.`],
+   ['Points vs book',`${f1(R.base_pts)} / ${f1(R.base_implied)}`,`Average points scored vs the average implied team total. Projection bias ${R.proj_bias==null?'—':(R.proj_bias>0?'+':'')+f2(R.proj_bias)} points (actual minus projected).`],
+   ['Team total spread',R.team_sd==null?'—':`±${f1(R.team_sd)} pts`,`Standard deviation of actual points around the projection. Around the book line it is ±${f1(R.sd_resid)}. This sets the under chance shown on the board.`],
+   ['Game total spread',R.game_sd==null?'—':`±${f1(R.game_sd)} pts`,`Standard deviation of the full-game total around the projected total. Two teams' noise adds up, which is why game-total edges need to be bigger.`],
+   ['Overtime',pct(R.ot_share,1),`Share of team-games that went to overtime. Those games scored ${R.ot_extra==null?'—':(R.ot_extra>0?'+':'')+f1(R.ot_extra)} more points than regulation games, which no pregame projection can see.`],
+  ].map(([k,v,d])=>`<div class="card"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span></div>`).join('');
+},'#cards');
+
+/* schedule spots */
+sec(()=>{
+  const SP=R.spots&&R.spots.length?R.spots:(R.situational||[]);
+  if(!SP.length){$('#spots').innerHTML=empty();return}
+  $('#spots').innerHTML=`<thead><tr><th class="l">Spot</th><th>Team-games</th><th>Share</th><th>Avg pts</th><th>Book</th><th>Miss</th><th class="groupsep">Under the line</th><th>Floor (95%)</th><th class="groupsep">Game under</th><th>Pace</th></tr></thead><tbody>${
+    SP.map(s=>{const all=s.label==='All team-games';
+      return `<tr${all?' class="base"':''}><td class="l">${all?s.label:'<b>'+s.label+'</b>'}</td><td>${num(s.n)}</td><td>${pct(s.share,1)}</td><td>${f1(s.pts)}</td><td>${f1(s.implied)}</td><td>${sgn(s.resid,2)}</td><td class="groupsep">${all?pct(s.under,1):hit(s.under,s.n)}</td><td>${pct(s.under_lo,1)}</td><td class="groupsep">${pct(s.game_under,1)}</td><td>${f1(s.pace)}</td></tr>`}).join('')}</tbody>`;
+  const b2b=SP.find(s=>s.label==='Back-to-back'), f30=SP.find(s=>s.label==='Fatigue index 30+');
+  $('#spots-note').textContent=`Read the Miss and Floor columns together. A spot with a miss of −1 point is real but small: a team total moves 11–12 points game to game, so one point of edge is about a 53–54% under rate at best.${b2b?` Back-to-backs: ${num(b2b.n)} team-games, miss ${b2b.resid>0?'+':''}${f2(b2b.resid)}, under ${pct(b2b.under,1)} (floor ${pct(b2b.under_lo,1)}).`:''}${f30?` Fatigue index 30+: under ${pct(f30.under,1)} (floor ${pct(f30.under_lo,1)}) over ${num(f30.n)}.`:''}`;
+},'#spots');
+
+/* edge tables */
+sec(()=>{
+  const ET=R.edge_table||[], GT=R.game_edge_table||[];
+  $('#edge-team').innerHTML=ET.length?`<thead><tr><th class="l">Edge (book − proj)</th><th>Team-games</th><th>Under the line</th><th>Floor (95%)</th><th>Proj</th><th>Book</th><th>Actual</th><th>Miss</th></tr></thead><tbody>${
+    ET.map(e=>`<tr><td class="l">${e.edge}</td><td>${num(e.n)}</td><td>${hit(e.under,e.n)}</td><td>${pct(e.under_lo,1)}</td><td>${f1(e.proj)}</td><td>${f1(e.implied)}</td><td>${f1(e.pts)}</td><td>${sgn(e.resid,2)}</td></tr>`).join('')}</tbody>`:empty('No edge buckets with 30+ team-games.');
+  $('#edge-game').innerHTML=GT.length?`<thead><tr><th class="l">Edge (total − proj)</th><th>Games</th><th>Under the total</th><th>Floor (95%)</th><th>Proj total</th><th>Book total</th><th>Actual</th><th>Miss</th></tr></thead><tbody>${
+    GT.map(e=>`<tr><td class="l">${e.edge}</td><td>${num(e.n)}</td><td>${hit(e.under,e.n)}</td><td>${pct(e.under_lo,1)}</td><td>${f1(e.proj)}</td><td>${f1(e.total)}</td><td>${f1(e.actual)}</td><td>${e.actual==null||e.total==null?'—':sgn(e.actual-e.total,2)}</td></tr>`).join('')}</tbody>`:empty('No game-total buckets with 30+ games.');
+  const C=(R.composites||[]).find(c=>/Projected/i.test(c.label));
+  $('#edge-note').textContent=`Base rates: ${pct(base,1)} of team totals and ${pct(R.game_base_under,1)} of game totals went under. The projection's correlation with the market miss is ${C?f3(C.rho_resid):'—'} on team totals and ${f3(R.game_rho_resid)} on game totals; zero would mean the projection only repeats what the book knows.`;
+},'#edge-team');
+
+/* inputs */
+sec(()=>{
+  const I=R.inputs||[];
+  if(!I.length){$('#inputs').innerHTML=empty();return}
+  const maxr=Math.max(0.01,...I.map(i=>Math.abs(i.rho_resid||0)));
+  const rows=[...I].sort((a,b)=>Math.abs(b.rho_resid||0)-Math.abs(a.rho_resid||0));
+  const bar=(v,col)=>`<span class="rbar" style="width:${Math.abs(v||0)/maxr*70}px;background:${col};opacity:${v<0?.45:1}"></span>`;
+  $('#inputs').innerHTML=`<thead><tr><th class="l">Input</th><th class="l">Group</th><th>vs points</th><th class="groupsep">vs market miss</th><th class="l"></th><th>AUC</th><th class="groupsep">Low → high fifth, under %</th></tr></thead><tbody>${
+    rows.map(i=>{const col=GRP[i.group]||'var(--muted)';
+      const right=i.binary?`${pct(i.yes_under,1)} with · ${pct(i.no_under,1)} without <span class="sub">(${i.yes_n==null?'':num(i.yes_n)+' with; '}${f1(i.yes_pts)} vs ${f1(i.no_pts)} pts)</span>`
+        :`${pct(i.low_under,1)} → ${pct(i.high_under,1)} <span class="sub">(miss ${i.low_resid==null?'—':(i.low_resid>0?'+':'')+f1(i.low_resid)} → ${i.high_resid==null?'—':(i.high_resid>0?'+':'')+f1(i.high_resid)})</span>`;
+      const strong=i.rho_resid!=null&&Math.abs(i.rho_resid)>=0.03;
+      return `<tr><td class="l">${strong?'<b>'+i.label+'</b>':i.label}</td><td class="l"><span class="grp" style="background:${col}">${GL[i.group]||i.group||''}</span></td><td>${f3(i.rho)}</td><td class="groupsep">${f3(i.rho_resid)}</td><td class="l" style="min-width:80px">${bar(i.rho_resid,col)}</td><td>${pct(i.auc,1)}</td><td class="groupsep">${right}</td></tr>`}).join('')}</tbody>`;
+},'#inputs');
+
+/* composites with quintiles */
+sec(()=>{
+  const C=R.composites||[];
+  if(!C.length){$('#comps').innerHTML='<div class="panel"><div class="empty">No composites yet.</div></div>';return}
+  $('#comps').innerHTML=C.map(c=>`<div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px"><b>${c.label}</b><span class="sub">AUC ${pct(c.auc,1)} · vs points ${f3(c.rho)} · vs market ${f3(c.rho_resid)}</span></div>
+    <table><thead><tr><th class="l">Fifth</th><th>Team-games</th><th>Avg pts</th><th>Miss</th><th>Under</th></tr></thead><tbody>${
+    (c.quintiles||[]).map(q=>`<tr><td class="l">${q.q}</td><td>${num(q.n)}</td><td>${f1(q.pts)}</td><td>${sgn(q.resid,2)}</td><td>${q.over==null?'—':hit(1-q.over,q.n)}</td></tr>`).join('')}</tbody></table></div>`).join('');
+},'#comps');
+
+/* score bands */
+sec(()=>{
+  const bn=(R.bands_new&&R.bands_new.length)?R.bands_new:(R.bands||[]);
+  if(!bn.length){$('#bands').innerHTML='<div class="empty">No bands yet.</div>';return}
+  const mid=b=>({'Under 30':15,'<30':15,'30–40':35,'30-40':35,'40–50':45,'40-50':45,'50–60':55,'50-60':55,'60–70':65,'60-70':65,'70+':85})[b]??50;
+  $('#bands').innerHTML=bn.map(b=>`<div class="brow"><span class="lab">${b.band}</span>
+    <div class="btrack"><div class="bfill" style="width:${(b.under||0)*100}%;background:${heat(mid(b.band))}"></div><div class="btxt">${pct(b.under,1)} under</div>${base!=null?`<div class="bline" style="left:${base*100}%" title="Base rate ${pct(base,1)}"></div>`:''}<div class="bline be" style="left:${BE*100}%" title="Break-even 52.4%"></div></div>
+    <span class="meta">${f1(b.pts)} pts · miss ${b.resid==null?'—':(b.resid>0?'+':'')+f2(b.resid)} · ${num(b.n)} games</span></div>`).join('')+
+    `<div class="sub" style="margin-top:6px">Base rate: ${pct(base,1)} of team-games finished under the book's team total (${f1(R.base_pts)} points per team-game). Bands use the board's current weights (v${model.version==null?'—':model.version}).</div>`;
+},'#bands');
+
+/* rules */
+sec(()=>{
+  const RR=R.rules;
+  if(!RR||!RR.rows||!RR.rows.length){$('#rules-sec').hidden=true;return}
+  const rs=RR.seasons||[];
+  $('#rules-lede').textContent=`Every game from ${rs[0]||'—'} to ${rs[rs.length-1]||'—'}, scored exactly the way the live board scores it, so a 30 here is a 30 on the board. "Hit" is the share of games where the side you'd bet won: the under for low scores and positive edges, the over for high scores and negative edges. ${RR.test?`"${RR.test}" is the most recent complete season on its own, to show whether a rule still held.`:''}`;
+  const tbl=kind=>{
+    const rows=RR.rows.filter(r=>r.kind===kind);
+    if(!rows.length)return empty();
+    const all=rows.find(r=>r.side==='all');
+    return `<thead><tr><th class="l">${kind==='team'?'Team total':'Game total'}</th><th class="l">Side</th><th>Games</th><th>Share</th><th>Miss</th><th class="groupsep">Hit</th><th>vs blind</th><th>Floor (95%)</th><th class="groupsep">${RR.test||'Test'} games</th><th>Hit</th></tr></thead><tbody>${
+      rows.map(r=>{const side=r.side;const h=r.under==null?null:side==='over'?1-r.under:r.under;
+        const b=all&&all.under!=null?(side==='over'?1-all.under:all.under):null;
+        const d=h!=null&&b!=null&&side!=='all'?h-b:null;
+        const th=r.test_under==null?null:side==='over'?1-r.test_under:r.test_under;
+        return `<tr${side==='all'?' class="base"':''}><td class="l">${r.label}</td><td class="l">${side==='all'?'—':side}</td><td>${num(r.n)}</td><td>${pct(r.share,1)}</td><td>${sgn(r.resid,2)}</td><td class="groupsep">${side==='all'?pct(h,1):hit(h,r.n)}</td><td>${d==null?'—':`<span class="${d>0?'pos':'neg'}">${d>0?'+':''}${(d*100).toFixed(1)}</span>`}</td><td>${side==='all'?'—':pct(r.under_lo,1)}</td><td class="groupsep">${num(r.test_n)}</td><td>${r.test_n?pct(th,1):'—'}</td></tr>`}).join('')}</tbody>`};
+  $('#rules-team').innerHTML=tbl('team');
+  $('#rules-game').innerHTML=tbl('game');
+  const dt=RR.dist&&RR.dist.team, dg=RR.dist&&RR.dist.game;
+  $('#rules-note').textContent=`"vs blind" is the difference from betting that side on every game. Floor is the 95% lower bound on the hit rate given the sample size; a rule whose floor sits above 50% has survived its own noise. Small samples (a few dozen games) can look great by luck.${dt?` Middle 50% of team scores: ${dt[1]}–${dt[3]} (10th–90th: ${dt[0]}–${dt[4]}).`:''}${dg?` Combined game scores: ${dg[1]}–${dg[3]}.`:''}${RR.team_n?` ${num(RR.team_n)} team-games, ${num(RR.game_n)} games.`:''}`;
+},'#rules-team');
+
+/* weights */
+sec(()=>{
+  const t=R.test||{}, prev=R.prev_weights, fit=R.fitted_w, sug=R.suggested_w;
+  const wbar=(w,title,sub)=>!w?'':`<div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px"><b>${title}</b><span class="sub">${sub}</span></div><div class="wbar">${
+    WK.filter(k=>w[k]>0).map(k=>`<span style="width:${w[k]*100}%;background:${WC[k]}" title="${WL[k]} ${Math.round(w[k]*100)}%">${WL[k]} ${Math.round(w[k]*100)}</span>`).join('')}</div></div>`;
+  const same=prev&&W&&WK.every(k=>(prev[k]||0)===(W[k]||0));
+  $('#wbars').innerHTML=(same?'':wbar(prev,'Previous',''))+wbar(W,`On the board now (v${model.version==null?'—':model.version})`,R.auc_new_all!=null?'ranking accuracy '+pct(R.auc_new_all,1):'')+wbar(sug,'Suggested by the fit (rounded to 5%)',t.fitted_auc!=null?`${pct(t.fitted_auc,1)} on ${t.season}`:'');
+  $('#wlede').textContent=(t.season?`Weights were fitted on the seasons before ${t.season}, then checked on ${t.season} (${num(t.n)} team-games), a season the fit never saw. There, the fitted weights ranked games against the book line at ${pct(t.fitted_auc,1)} vs ${pct(t.default_auc,1)} for the board's current weights, and the projection's edge on its own at ${pct(t.proj_auc,1)}. `:'')+`Fitting each season on its own (table below) shows how stable each input's share is; a share that jumps around is noise, not signal.`+(R.learn?` Weekly learner, ${R.learn.date||''}: ${R.learn.decision||''}. ${R.learn.reason||''}`:'');
+  const PS=R.per_season_w||{};
+  const row=(lab,w,bold)=>`<tr><td class="l">${bold?'<b>'+lab+'</b>':lab}</td>${WK.map(k=>`<td>${w&&w[k]>0?(bold?'<b>':'')+Math.round(w[k]*100)+'%'+(bold?'</b>':''):'<span class="sub">0</span>'}</td>`).join('')}</tr>`;
+  $('#wseason').innerHTML=`<thead><tr><th class="l">Fitted on</th>${WK.map(k=>`<th>${WL[k]}</th>`).join('')}</tr></thead><tbody>${
+    Object.entries(PS).map(([s,w])=>row(s+' only',w)).join('')}${fit?row('All training seasons',fit,true):''}${sug?row('Suggested (rounded)',sug):''}${row('On the board now',W,true)}</tbody>`;
+},'#wseason');
+
+/* measured effects vs model */
+sec(()=>{
+  const M=R.measured;
+  if(!M){$('#measured').innerHTML=empty();return}
+  const rows=[['home','Home court multiplier','Points scaled by this at home.'],['away','Away multiplier','Points scaled by this on the road.'],
+    ['fatigueK','Fatigue K','Share of points a fully tired team (index 100) loses.'],['oppFatigueK','Opp fatigue K','Share a team gains against a fully tired defense.'],
+    ['availK','Availability K','How much of an absent player\'s scoring share comes off the projection.'],['sdTeam','Team sd','Spread of points around the projection, used for under chances.'],['sdGame','Game sd','Spread of the game total around the projected total.']];
+  const tol={home:.02,away:.02,fatigueK:.015,oppFatigueK:.015,availK:.015,sdTeam:1.5,sdGame:1.5};
+  $('#measured').innerHTML=`<thead><tr><th class="l">Effect</th><th>Measured</th><th>Model uses</th><th>Gap</th><th class="l">Meaning</th></tr></thead><tbody>${
+    rows.map(([k,lab,why])=>{const m=M[k],p=PJ[k];const d=m!=null&&p!=null?m-p:null;const dec=k.startsWith('sd')?1:k.endsWith('K')?3:3;
+      const p2=d==null?'—':`<span class="pill ${Math.abs(d)>tol[k]?'p-warn':'p-good'}">${d>0?'+':''}${d.toFixed(dec)}</span>`;
+      return `<tr><td class="l">${lab}</td><td>${m==null?'—':(+m).toFixed(dec)}</td><td>${p==null?'—':(+p).toFixed(dec)}</td><td>${p2}</td><td class="wrap">${why}</td></tr>`}).join('')}</tbody>`;
+},'#measured');
+
+/* by season */
+sec(()=>{
+  const bs=R.by_season||[];
+  if(!bs.length){$('#seasons').innerHTML=empty();return}
+  const c=v=>v==null?'—':`<span class="mini" style="background:${heat((v-.5)/.15*100)}">${pct(v,1)}</span>`;
+  const hasNew=bs.some(s=>s.new!=null);
+  $('#seasons').innerHTML=`<thead><tr><th class="l">Season</th><th>Team-games</th><th>Board score${hasNew?' (at backtest)':''}</th>${hasNew?'<th>Board score (now)</th>':''}<th>Projection edge</th><th class="groupsep">Under rate</th><th>Avg pts</th><th>Miss</th></tr></thead><tbody>${
+    bs.map(s=>`<tr><td class="l">${s.season}</td><td>${num(s.n)}</td><td>${c(s.board)}</td>${hasNew?`<td>${c(s.new)}</td>`:''}<td>${c(s.edge)}</td><td class="groupsep">${pct(s.under,1)}</td><td>${f1(s.pts)}</td><td>${sgn(s.resid,2)}</td></tr>`).join('')}</tbody>`;
+},'#seasons');
+
+/* model history */
+sec(()=>{
+  const H=model.history||[];
+  $('#histlede').textContent=model.version!=null?`The board is on model v${model.version}, updated ${model.updated||'—'}. Each row is one change to the weights and why it was made.`:'';
+  $('#hist').innerHTML=H.length?`<thead><tr><th class="l">Version</th><th class="l">Date</th>${WK.map(k=>`<th>${WL[k]}</th>`).join('')}<th class="l">Why</th></tr></thead><tbody>${
+    [...H].reverse().map(h=>`<tr><td class="l">v${h.version}</td><td class="l">${h.date}</td>${WK.map(k=>`<td>${Math.round(((h.weights||{})[k]||0)*100)}%</td>`).join('')}<td class="wrap">${h.why||''}</td></tr>`).join('')}</tbody>`:empty('No model history yet.');
+},'#hist');
+
+/* method */
+sec(()=>{
+  const FP=model.fatigue||{};
+  $('#method').innerHTML=[
+   `Data: ESPN box scores and player lines for every regular-season game, ${first} to ${last}, plus the season before ${first} for the first season's starting point. Closing spreads and totals come from the same feed; team totals are implied from them (total ± spread, halved).`,
+   `No peeking: each game only uses stats from before that date. Last season counts as ${model.priorGames||15} games and fades as the current season builds, like the live board.`,
+   `Schedule spots come from the schedule alone, with the same function the live board uses. The fatigue index adds ${FP.b2b!=null?FP.b2b+' for a back-to-back, ':''}${FP.threeInFour!=null?FP.threeInFour+' for a third game in four nights, ':''}${FP.altitude!=null?FP.altitude+' for visiting altitude, ':''}and smaller amounts for trips, travel distance and time zones${FP.restBonus!=null?', minus '+FP.restBonus+' for extra rest':''}.`,
+   `Availability is the share of the team's pregame scoring that belonged to regulars who did not play, which stands in for the injury report the live board reads from ESPN.`,
+   `Points include overtime. "Under" means the team finished strictly under its implied total; pushes count as not-under.`,
+   `Weights are fitted with logistic regression on "went over the line", with the last complete season held out as the test. The weekly learner refits the same way and moves at most 10 points per input per change.`,
+   `What this can't tell you: whether you could have got these closing numbers. Lines move, and the board reads them during the day, not at tip-off.`,
+  ].map(x=>`<li>${x}</li>`).join('');
+},'#method');
+</script>
+</body></html>

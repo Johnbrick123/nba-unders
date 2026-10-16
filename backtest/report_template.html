@@ -1,0 +1,326 @@
+<title>NBA Backtest</title>
+<style>
+/* Layout: same dark board look as the NBA Unders / NHL Unders pages; a single reading column of findings, each with one chart or table. */
+:root{
+  --bg:#0e1116; --panel:#161b22; --panel2:#1c232d; --line:#2a323d;
+  --txt:#e6edf3; --muted:#8b98a5; --accent:#4a9eff; --chip:#222c38;
+  --good:#7ee0a2; --warn:#f0c674; --bad:#f08a84; --ink:#06121f;
+  --team:#4a9eff; --opp:#c792ea; --spot:#f0c674; --matchup:#7fd1c7; --model:#a98be0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{font-size:18px;margin:0;font-weight:650}
+.date{color:var(--muted);font-size:13px}
+main{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:18px 60px;display:grid;gap:28px}
+h2{font-size:15px;margin:0 0 4px;font-weight:650}
+h3{font-size:13px;margin:0 0 6px;font-weight:650;color:#c9d4de}
+.lede{color:#c9d4de;margin:0 0 12px;max-width:75ch}
+.sub{color:var(--muted);font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.card .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.card .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.card .d{font-size:12.5px;color:#c9d4de}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:7px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+td.l,th.l{text-align:left}
+td.wrap{white-space:normal;text-align:left;min-width:240px;color:#c9d4de;font-size:12.5px}
+.groupsep{border-left:2px solid var(--line)}
+.mini{display:inline-block;min-width:44px;padding:3px 7px;border-radius:5px;font-weight:700;color:var(--ink);text-align:center}
+.pill{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:650}
+.p-good{background:rgba(126,224,162,.16);color:var(--good)} .p-warn{background:rgba(240,198,116,.14);color:var(--warn)} .p-bad{background:rgba(240,138,132,.14);color:var(--bad)} .p-mute{background:var(--panel2);color:var(--muted)}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+.empty{color:var(--muted);padding:14px;text-align:center}
+tr.base td{color:var(--muted)}
+/* band chart */
+.bands{display:grid;gap:8px}
+.brow{display:grid;grid-template-columns:78px minmax(0,1fr) 190px;gap:10px;align-items:center}
+.brow .lab{font-weight:650;font-variant-numeric:tabular-nums}
+.btrack{position:relative;height:22px;background:var(--panel2);border-radius:4px}
+.bfill{position:absolute;inset:0 auto 0 0;border-radius:4px}
+.bline{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--txt);opacity:.55}
+.bline.be{background:var(--good);opacity:.7}
+.btxt{position:absolute;left:8px;top:2px;font-weight:700;color:var(--ink);font-size:12.5px}
+.brow .meta{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+/* inputs table bar */
+.rbar{display:inline-block;height:10px;border-radius:3px;vertical-align:middle;margin-left:6px}
+.grp{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:4px;color:var(--ink);font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.wbar{display:flex;height:26px;border-radius:5px;overflow:hidden;font-size:11.5px;font-weight:650;color:var(--ink)}
+.wbar span{display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}
+ul.plain{margin:0;padding-left:18px;display:grid;gap:5px;color:#c9d4de;max-width:78ch}
+@media (max-width:640px){.brow{grid-template-columns:64px minmax(0,1fr)}.brow .meta{grid-column:2}}
+</style>
+
+<header><h1>🏀 NBA Backtest</h1><span class="date" id="hdr"></span><span style="flex:1"></span><nav style="display:flex;gap:12px;font-size:12.5px"><a href="index.html" style="color:var(--accent);text-decoration:none">Board</a><a href="monitor.html" style="color:var(--accent);text-decoration:none">Accuracy monitor</a></nav></header>
+<main>
+  <section>
+    <p class="lede" id="intro"></p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section>
+    <h2>What the schedule does</h2>
+    <p class="lede">This is the fatigue index's report card. Every schedule spot the board scores, with how the team actually did against the book's team total. "Book" is the implied team total from the closing spread and total; "Miss" is actual points minus that, so a negative miss means the book had the team too high. Under the line at 52.4% or better pays at −110. "Floor" is the 95% lower bound on the under rate, so a spot whose floor clears 50% is a signal rather than noise. "Game under" is the full-game total.</p>
+    <div class="panel scroll"><table id="spots"></table></div>
+    <p class="sub" id="spots-note" style="margin-top:8px"></p>
+  </section>
+
+  <section>
+    <h2>Does the projection beat the book?</h2>
+    <p class="lede">Edge is the book's number minus the board's projection. Positive edge means the book has the team (or game) higher than we do, so the under is the play. If the projection knows nothing the book doesn't, every row sits near 50%. At −110 you need 52.4% to break even, and the floor column tells you whether a bucket's hit rate could be luck.</p>
+    <div class="panel scroll"><h3>Team totals</h3><table id="edge-team"></table></div>
+    <div class="panel scroll" style="margin-top:10px"><h3>Game totals</h3><table id="edge-game"></table></div>
+    <p class="sub" id="edge-note" style="margin-top:8px"></p>
+  </section>
+
+  <section>
+    <h2>Which inputs predict points, and which predict what the market missed</h2>
+    <p class="lede">Each input tested on its own. "vs points" is its correlation with points scored: offense and pace score high here, but the book already prices season ratings, so that column mostly tells you what the market knows. "vs market miss" is the correlation with points minus the book line: that is the column that matters, because it is the only thing you can bet on. Basketball is noisy game to game, so 0.03–0.06 against the market is a real signal and 0.10 is large. The right column compares the fifth of games where the input most favoured the under with the fifth where it least did.</p>
+    <div class="legend"><span><i style="background:var(--team)"></i>Team's own offense</span><span><i style="background:var(--opp)"></i>Opponent</span><span><i style="background:var(--matchup)"></i>Matchup</span><span><i style="background:var(--spot)"></i>Situation</span><span><i style="background:var(--model)"></i>Model output</span></div>
+    <div class="panel scroll"><table id="inputs"></table></div>
+    <p class="sub" style="margin-top:8px">AUC is ranking accuracy for "went over the book line": 50% is a coin flip. Right column: under rate in the bottom vs top fifth of games for that input, or with vs without for yes/no situations.</p>
+  </section>
+
+  <section>
+    <h2>The board score and the projection, in fifths</h2>
+    <p class="lede">Every team-game sorted by the board's score (with the current weights) and by the projection, then cut into five equal groups. Group 1 is the lowest fifth. A working score shows the miss and the under rate falling as the group number rises.</p>
+    <div class="wgrid" id="comps"></div>
+  </section>
+
+  <section>
+    <h2>Score bands</h2>
+    <p class="lede">Every team-game sorted by its board score before tip-off. The bar shows how often the team stayed under the book's team total. The white line is the base rate across all games; the green line is 52.4%, break-even at −110. Red bands are your under spots.</p>
+    <div class="panel"><div class="bands" id="bands"></div></div>
+  </section>
+
+  <section id="rules-sec">
+    <h2>Rules: what happened at the extremes</h2>
+    <p class="lede" id="rules-lede"></p>
+    <div class="panel scroll"><h3>Team totals</h3><table id="rules-team"></table></div>
+    <div class="panel scroll" style="margin-top:10px"><h3>Game totals</h3><table id="rules-game"></table></div>
+    <p class="sub" id="rules-note" style="margin-top:8px"></p>
+  </section>
+
+  <section>
+    <h2>Weights: fitted vs current</h2>
+    <p class="lede" id="wlede"></p>
+    <div class="wgrid" id="wbars"></div>
+    <div class="panel scroll" style="margin-top:12px"><table id="wseason"></table></div>
+  </section>
+
+  <section>
+    <h2>Home court, rest and injuries: measured vs what the projection uses</h2>
+    <p class="lede">The projection turns ratings into points with a handful of multipliers from model.json. Here they are next to the sizes the backtest measured. A large gap means the projection is mis-sizing a spot and the learner will flag it.</p>
+    <div class="panel scroll"><table id="measured"></table></div>
+  </section>
+
+  <section>
+    <h2>Season by season</h2>
+    <p class="lede">Ranking accuracy against the book line: take one team-game that went over its line and one that went under. This is how often the method ranked the over game higher before tip-off. 50% is a coin flip. Because the book already knows the ratings, 55–60% here is good; the NHL board's goal-line numbers aren't comparable.</p>
+    <div class="panel scroll"><table id="seasons"></table></div>
+  </section>
+
+  <section>
+    <h2>Model history</h2>
+    <p class="lede" id="histlede"></p>
+    <div class="panel scroll"><table id="hist"></table></div>
+  </section>
+
+  <section>
+    <h2>How the test was run</h2>
+    <ul class="plain" id="method"></ul>
+  </section>
+</main>
+
+<script>
+const R=/*__DATA__*/null;
+const $=s=>document.querySelector(s);
+const pct=(v,d=0)=>v==null||isNaN(v)?'—':(v*100).toFixed(d)+'%';
+const f1=v=>v==null||isNaN(v)?'—':(+v).toFixed(1);
+const f2=v=>v==null||isNaN(v)?'—':(+v).toFixed(2);
+const f3=v=>v==null||isNaN(v)?'—':(v>=0?'+':'')+(+v).toFixed(3);
+const num=v=>v==null?'—':(+v).toLocaleString();
+const sgn=(v,d=1)=>v==null||isNaN(v)?'—':`<span class="${v<0?'neg':v>0?'pos':''}">${v>0?'+':''}${(+v).toFixed(d)}</span>`;
+const heat=v=>`hsl(${Math.max(0,Math.min(100,v))*1.2} 62% 46%)`;
+const BE=0.524;
+const hit=(p,n)=>p==null?'—':`<span class="pill ${n!=null&&n<30?'p-mute':p>=BE?'p-good':p>=0.5?'p-warn':'p-bad'}">${pct(p,1)}</span>`;
+const GRP={team:'var(--team)',opp:'var(--opp)',matchup:'var(--matchup)',spot:'var(--spot)',model:'var(--model)'};
+const GL={team:'Team',opp:'Opp',matchup:'Matchup',spot:'Spot',model:'Model'};
+const WL={off:'Offense',def:'Opp D',pace:'Pace',fatigue:'Rest',oppFatigue:'Opp rest',avail:'Avail',l5:'L5'};
+const WC={off:'var(--team)',def:'var(--opp)',pace:'var(--matchup)',fatigue:'var(--spot)',oppFatigue:'#d9a85c',avail:'#6c8db8',l5:'#8fb3a5'};
+const WK=Object.keys(WL);
+const empty=(t='No backtest results yet.')=>`<tr><td class="empty">${t}</td></tr>`;
+const sec=(fn,id)=>{try{fn()}catch(e){console.warn(id,e);const el=id&&$(id);if(el)el.innerHTML=el.tagName==='TABLE'?empty('Not available in this run.'):'<div class="empty">Not available in this run.</div>'}};
+
+if(!R||!R.n){
+  $('#hdr').textContent='no results yet';
+  $('#intro').textContent='The backtest has not run yet. The weekly GitHub Action runs backtest.py, rules.py, learn.py and report.py; this page fills in after the first run.';
+  for(const id of ['spots','edge-team','edge-game','inputs','rules-team','rules-game','wseason','measured','seasons','hist']) $('#'+id).innerHTML=empty();
+  throw new Error('no data');
+}
+const seasons=R.seasons||[], first=seasons[0]||'—', last=seasons[seasons.length-1]||'—';
+const base=R.base_under, model=R.model||{}, W=model.weights||{}, PJ=model.projection||{};
+
+$('#hdr').textContent=`${num(R.n)} team-games · ${first} to ${last}${R.data_through?' · through '+R.data_through:''}`;
+$('#intro').textContent=`Every regular-season team-game from ${first} through ${last} was replayed day by day. Each team's ratings, pace, schedule spot and missing scorers were rebuilt using only games played before that date, plus last season counted as ${model.priorGames||15} games, the same way the live board does it. The target is not points: it is whether the team finished under the book's closing team total. The book already prices offense, defense and pace, so the question is what the board knows that the line doesn't.`;
+
+/* headline cards */
+sec(()=>{
+  $('#cards').innerHTML=[
+   ['Team-games',num(R.n),`${seasons.length} season${seasons.length===1?'':'s'}: ${seasons.join(', ')}.${R.current_n?` ${num(R.current_n)} so far in ${R.current}.`:''}`],
+   ['Base under rate',pct(base,1),`Share of team-games that finished under the book's implied team total. The book aims for 50%; 52.4% is break-even at −110. Game totals: ${pct(R.game_base_under,1)} under over ${num(R.game_n)} games.`],
+   ['Points vs book',`${f1(R.base_pts)} / ${f1(R.base_implied)}`,`Average points scored vs the average implied team total. Projection bias ${R.proj_bias==null?'—':(R.proj_bias>0?'+':'')+f2(R.proj_bias)} points (actual minus projected).`],
+   ['Team total spread',R.team_sd==null?'—':`±${f1(R.team_sd)} pts`,`Standard deviation of actual points around the projection. Around the book line it is ±${f1(R.sd_resid)}. This sets the under chance shown on the board.`],
+   ['Game total spread',R.game_sd==null?'—':`±${f1(R.game_sd)} pts`,`Standard deviation of the full-game total around the projected total. Two teams' noise adds up, which is why game-total edges need to be bigger.`],
+   ['Overtime',pct(R.ot_share,1),`Share of team-games that went to overtime. Those games scored ${R.ot_extra==null?'—':(R.ot_extra>0?'+':'')+f1(R.ot_extra)} more points than regulation games, which no pregame projection can see.`],
+  ].map(([k,v,d])=>`<div class="card"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span></div>`).join('');
+},'#cards');
+
+/* schedule spots */
+sec(()=>{
+  const SP=R.spots&&R.spots.length?R.spots:(R.situational||[]);
+  if(!SP.length){$('#spots').innerHTML=empty();return}
+  $('#spots').innerHTML=`<thead><tr><th class="l">Spot</th><th>Team-games</th><th>Share</th><th>Avg pts</th><th>Book</th><th>Miss</th><th class="groupsep">Under the line</th><th>Floor (95%)</th><th class="groupsep">Game under</th><th>Pace</th></tr></thead><tbody>${
+    SP.map(s=>{const all=s.label==='All team-games';
+      return `<tr${all?' class="base"':''}><td class="l">${all?s.label:'<b>'+s.label+'</b>'}</td><td>${num(s.n)}</td><td>${pct(s.share,1)}</td><td>${f1(s.pts)}</td><td>${f1(s.implied)}</td><td>${sgn(s.resid,2)}</td><td class="groupsep">${all?pct(s.under,1):hit(s.under,s.n)}</td><td>${pct(s.under_lo,1)}</td><td class="groupsep">${pct(s.game_under,1)}</td><td>${f1(s.pace)}</td></tr>`}).join('')}</tbody>`;
+  const b2b=SP.find(s=>s.label==='Back-to-back'), f30=SP.find(s=>s.label==='Fatigue index 30+');
+  $('#spots-note').textContent=`Read the Miss and Floor columns together. A spot with a miss of −1 point is real but small: a team total moves 11–12 points game to game, so one point of edge is about a 53–54% under rate at best.${b2b?` Back-to-backs: ${num(b2b.n)} team-games, miss ${b2b.resid>0?'+':''}${f2(b2b.resid)}, under ${pct(b2b.under,1)} (floor ${pct(b2b.under_lo,1)}).`:''}${f30?` Fatigue index 30+: under ${pct(f30.under,1)} (floor ${pct(f30.under_lo,1)}) over ${num(f30.n)}.`:''}`;
+},'#spots');
+
+/* edge tables */
+sec(()=>{
+  const ET=R.edge_table||[], GT=R.game_edge_table||[];
+  $('#edge-team').innerHTML=ET.length?`<thead><tr><th class="l">Edge (book − proj)</th><th>Team-games</th><th>Under the line</th><th>Floor (95%)</th><th>Proj</th><th>Book</th><th>Actual</th><th>Miss</th></tr></thead><tbody>${
+    ET.map(e=>`<tr><td class="l">${e.edge}</td><td>${num(e.n)}</td><td>${hit(e.under,e.n)}</td><td>${pct(e.under_lo,1)}</td><td>${f1(e.proj)}</td><td>${f1(e.implied)}</td><td>${f1(e.pts)}</td><td>${sgn(e.resid,2)}</td></tr>`).join('')}</tbody>`:empty('No edge buckets with 30+ team-games.');
+  $('#edge-game').innerHTML=GT.length?`<thead><tr><th class="l">Edge (total − proj)</th><th>Games</th><th>Under the total</th><th>Floor (95%)</th><th>Proj total</th><th>Book total</th><th>Actual</th><th>Miss</th></tr></thead><tbody>${
+    GT.map(e=>`<tr><td class="l">${e.edge}</td><td>${num(e.n)}</td><td>${hit(e.under,e.n)}</td><td>${pct(e.under_lo,1)}</td><td>${f1(e.proj)}</td><td>${f1(e.total)}</td><td>${f1(e.actual)}</td><td>${e.actual==null||e.total==null?'—':sgn(e.actual-e.total,2)}</td></tr>`).join('')}</tbody>`:empty('No game-total buckets with 30+ games.');
+  const C=(R.composites||[]).find(c=>/Projected/i.test(c.label));
+  $('#edge-note').textContent=`Base rates: ${pct(base,1)} of team totals and ${pct(R.game_base_under,1)} of game totals went under. The projection's correlation with the market miss is ${C?f3(C.rho_resid):'—'} on team totals and ${f3(R.game_rho_resid)} on game totals; zero would mean the projection only repeats what the book knows.`;
+},'#edge-team');
+
+/* inputs */
+sec(()=>{
+  const I=R.inputs||[];
+  if(!I.length){$('#inputs').innerHTML=empty();return}
+  const maxr=Math.max(0.01,...I.map(i=>Math.abs(i.rho_resid||0)));
+  const rows=[...I].sort((a,b)=>Math.abs(b.rho_resid||0)-Math.abs(a.rho_resid||0));
+  const bar=(v,col)=>`<span class="rbar" style="width:${Math.abs(v||0)/maxr*70}px;background:${col};opacity:${v<0?.45:1}"></span>`;
+  $('#inputs').innerHTML=`<thead><tr><th class="l">Input</th><th class="l">Group</th><th>vs points</th><th class="groupsep">vs market miss</th><th class="l"></th><th>AUC</th><th class="groupsep">Low → high fifth, under %</th></tr></thead><tbody>${
+    rows.map(i=>{const col=GRP[i.group]||'var(--muted)';
+      const right=i.binary?`${pct(i.yes_under,1)} with · ${pct(i.no_under,1)} without <span class="sub">(${i.yes_n==null?'':num(i.yes_n)+' with; '}${f1(i.yes_pts)} vs ${f1(i.no_pts)} pts)</span>`
+        :`${pct(i.low_under,1)} → ${pct(i.high_under,1)} <span class="sub">(miss ${i.low_resid==null?'—':(i.low_resid>0?'+':'')+f1(i.low_resid)} → ${i.high_resid==null?'—':(i.high_resid>0?'+':'')+f1(i.high_resid)})</span>`;
+      const strong=i.rho_resid!=null&&Math.abs(i.rho_resid)>=0.03;
+      return `<tr><td class="l">${strong?'<b>'+i.label+'</b>':i.label}</td><td class="l"><span class="grp" style="background:${col}">${GL[i.group]||i.group||''}</span></td><td>${f3(i.rho)}</td><td class="groupsep">${f3(i.rho_resid)}</td><td class="l" style="min-width:80px">${bar(i.rho_resid,col)}</td><td>${pct(i.auc,1)}</td><td class="groupsep">${right}</td></tr>`}).join('')}</tbody>`;
+},'#inputs');
+
+/* composites with quintiles */
+sec(()=>{
+  const C=R.composites||[];
+  if(!C.length){$('#comps').innerHTML='<div class="panel"><div class="empty">No composites yet.</div></div>';return}
+  $('#comps').innerHTML=C.map(c=>`<div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px"><b>${c.label}</b><span class="sub">AUC ${pct(c.auc,1)} · vs points ${f3(c.rho)} · vs market ${f3(c.rho_resid)}</span></div>
+    <table><thead><tr><th class="l">Fifth</th><th>Team-games</th><th>Avg pts</th><th>Miss</th><th>Under</th></tr></thead><tbody>${
+    (c.quintiles||[]).map(q=>`<tr><td class="l">${q.q}</td><td>${num(q.n)}</td><td>${f1(q.pts)}</td><td>${sgn(q.resid,2)}</td><td>${q.over==null?'—':hit(1-q.over,q.n)}</td></tr>`).join('')}</tbody></table></div>`).join('');
+},'#comps');
+
+/* score bands */
+sec(()=>{
+  const bn=(R.bands_new&&R.bands_new.length)?R.bands_new:(R.bands||[]);
+  if(!bn.length){$('#bands').innerHTML='<div class="empty">No bands yet.</div>';return}
+  const mid=b=>({'Under 30':15,'<30':15,'30–40':35,'30-40':35,'40–50':45,'40-50':45,'50–60':55,'50-60':55,'60–70':65,'60-70':65,'70+':85})[b]??50;
+  $('#bands').innerHTML=bn.map(b=>`<div class="brow"><span class="lab">${b.band}</span>
+    <div class="btrack"><div class="bfill" style="width:${(b.under||0)*100}%;background:${heat(mid(b.band))}"></div><div class="btxt">${pct(b.under,1)} under</div>${base!=null?`<div class="bline" style="left:${base*100}%" title="Base rate ${pct(base,1)}"></div>`:''}<div class="bline be" style="left:${BE*100}%" title="Break-even 52.4%"></div></div>
+    <span class="meta">${f1(b.pts)} pts · miss ${b.resid==null?'—':(b.resid>0?'+':'')+f2(b.resid)} · ${num(b.n)} games</span></div>`).join('')+
+    `<div class="sub" style="margin-top:6px">Base rate: ${pct(base,1)} of team-games finished under the book's team total (${f1(R.base_pts)} points per team-game). Bands use the board's current weights (v${model.version==null?'—':model.version}).</div>`;
+},'#bands');
+
+/* rules */
+sec(()=>{
+  const RR=R.rules;
+  if(!RR||!RR.rows||!RR.rows.length){$('#rules-sec').hidden=true;return}
+  const rs=RR.seasons||[];
+  $('#rules-lede').textContent=`Every game from ${rs[0]||'—'} to ${rs[rs.length-1]||'—'}, scored exactly the way the live board scores it, so a 30 here is a 30 on the board. "Hit" is the share of games where the side you'd bet won: the under for low scores and positive edges, the over for high scores and negative edges. ${RR.test?`"${RR.test}" is the most recent complete season on its own, to show whether a rule still held.`:''}`;
+  const tbl=kind=>{
+    const rows=RR.rows.filter(r=>r.kind===kind);
+    if(!rows.length)return empty();
+    const all=rows.find(r=>r.side==='all');
+    return `<thead><tr><th class="l">${kind==='team'?'Team total':'Game total'}</th><th class="l">Side</th><th>Games</th><th>Share</th><th>Miss</th><th class="groupsep">Hit</th><th>vs blind</th><th>Floor (95%)</th><th class="groupsep">${RR.test||'Test'} games</th><th>Hit</th></tr></thead><tbody>${
+      rows.map(r=>{const side=r.side;const h=r.under==null?null:side==='over'?1-r.under:r.under;
+        const b=all&&all.under!=null?(side==='over'?1-all.under:all.under):null;
+        const d=h!=null&&b!=null&&side!=='all'?h-b:null;
+        const th=r.test_under==null?null:side==='over'?1-r.test_under:r.test_under;
+        return `<tr${side==='all'?' class="base"':''}><td class="l">${r.label}</td><td class="l">${side==='all'?'—':side}</td><td>${num(r.n)}</td><td>${pct(r.share,1)}</td><td>${sgn(r.resid,2)}</td><td class="groupsep">${side==='all'?pct(h,1):hit(h,r.n)}</td><td>${d==null?'—':`<span class="${d>0?'pos':'neg'}">${d>0?'+':''}${(d*100).toFixed(1)}</span>`}</td><td>${side==='all'?'—':pct(r.under_lo,1)}</td><td class="groupsep">${num(r.test_n)}</td><td>${r.test_n?pct(th,1):'—'}</td></tr>`}).join('')}</tbody>`};
+  $('#rules-team').innerHTML=tbl('team');
+  $('#rules-game').innerHTML=tbl('game');
+  const dt=RR.dist&&RR.dist.team, dg=RR.dist&&RR.dist.game;
+  $('#rules-note').textContent=`"vs blind" is the difference from betting that side on every game. Floor is the 95% lower bound on the hit rate given the sample size; a rule whose floor sits above 50% has survived its own noise. Small samples (a few dozen games) can look great by luck.${dt?` Middle 50% of team scores: ${dt[1]}–${dt[3]} (10th–90th: ${dt[0]}–${dt[4]}).`:''}${dg?` Combined game scores: ${dg[1]}–${dg[3]}.`:''}${RR.team_n?` ${num(RR.team_n)} team-games, ${num(RR.game_n)} games.`:''}`;
+},'#rules-team');
+
+/* weights */
+sec(()=>{
+  const t=R.test||{}, prev=R.prev_weights, fit=R.fitted_w, sug=R.suggested_w;
+  const wbar=(w,title,sub)=>!w?'':`<div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px"><b>${title}</b><span class="sub">${sub}</span></div><div class="wbar">${
+    WK.filter(k=>w[k]>0).map(k=>`<span style="width:${w[k]*100}%;background:${WC[k]}" title="${WL[k]} ${Math.round(w[k]*100)}%">${WL[k]} ${Math.round(w[k]*100)}</span>`).join('')}</div></div>`;
+  const same=prev&&W&&WK.every(k=>(prev[k]||0)===(W[k]||0));
+  $('#wbars').innerHTML=(same?'':wbar(prev,'Previous',''))+wbar(W,`On the board now (v${model.version==null?'—':model.version})`,R.auc_new_all!=null?'ranking accuracy '+pct(R.auc_new_all,1):'')+wbar(sug,'Suggested by the fit (rounded to 5%)',t.fitted_auc!=null?`${pct(t.fitted_auc,1)} on ${t.season}`:'');
+  $('#wlede').textContent=(t.season?`Weights were fitted on the seasons before ${t.season}, then checked on ${t.season} (${num(t.n)} team-games), a season the fit never saw. There, the fitted weights ranked games against the book line at ${pct(t.fitted_auc,1)} vs ${pct(t.default_auc,1)} for the board's current weights, and the projection's edge on its own at ${pct(t.proj_auc,1)}. `:'')+`Fitting each season on its own (table below) shows how stable each input's share is; a share that jumps around is noise, not signal.`+(R.learn?` Weekly learner, ${R.learn.date||''}: ${R.learn.decision||''}. ${R.learn.reason||''}`:'');
+  const PS=R.per_season_w||{};
+  const row=(lab,w,bold)=>`<tr><td class="l">${bold?'<b>'+lab+'</b>':lab}</td>${WK.map(k=>`<td>${w&&w[k]>0?(bold?'<b>':'')+Math.round(w[k]*100)+'%'+(bold?'</b>':''):'<span class="sub">0</span>'}</td>`).join('')}</tr>`;
+  $('#wseason').innerHTML=`<thead><tr><th class="l">Fitted on</th>${WK.map(k=>`<th>${WL[k]}</th>`).join('')}</tr></thead><tbody>${
+    Object.entries(PS).map(([s,w])=>row(s+' only',w)).join('')}${fit?row('All training seasons',fit,true):''}${sug?row('Suggested (rounded)',sug):''}${row('On the board now',W,true)}</tbody>`;
+},'#wseason');
+
+/* measured effects vs model */
+sec(()=>{
+  const M=R.measured;
+  if(!M){$('#measured').innerHTML=empty();return}
+  const rows=[['home','Home court multiplier','Points scaled by this at home.'],['away','Away multiplier','Points scaled by this on the road.'],
+    ['fatigueK','Fatigue K','Share of points a fully tired team (index 100) loses.'],['oppFatigueK','Opp fatigue K','Share a team gains against a fully tired defense.'],
+    ['availK','Availability K','How much of an absent player\'s scoring share comes off the projection.'],['sdTeam','Team sd','Spread of points around the projection, used for under chances.'],['sdGame','Game sd','Spread of the game total around the projected total.']];
+  const tol={home:.02,away:.02,fatigueK:.015,oppFatigueK:.015,availK:.015,sdTeam:1.5,sdGame:1.5};
+  $('#measured').innerHTML=`<thead><tr><th class="l">Effect</th><th>Measured</th><th>Model uses</th><th>Gap</th><th class="l">Meaning</th></tr></thead><tbody>${
+    rows.map(([k,lab,why])=>{const m=M[k],p=PJ[k];const d=m!=null&&p!=null?m-p:null;const dec=k.startsWith('sd')?1:k.endsWith('K')?3:3;
+      const p2=d==null?'—':`<span class="pill ${Math.abs(d)>tol[k]?'p-warn':'p-good'}">${d>0?'+':''}${d.toFixed(dec)}</span>`;
+      return `<tr><td class="l">${lab}</td><td>${m==null?'—':(+m).toFixed(dec)}</td><td>${p==null?'—':(+p).toFixed(dec)}</td><td>${p2}</td><td class="wrap">${why}</td></tr>`}).join('')}</tbody>`;
+},'#measured');
+
+/* by season */
+sec(()=>{
+  const bs=R.by_season||[];
+  if(!bs.length){$('#seasons').innerHTML=empty();return}
+  const c=v=>v==null?'—':`<span class="mini" style="background:${heat((v-.5)/.15*100)}">${pct(v,1)}</span>`;
+  const hasNew=bs.some(s=>s.new!=null);
+  $('#seasons').innerHTML=`<thead><tr><th class="l">Season</th><th>Team-games</th><th>Board score${hasNew?' (at backtest)':''}</th>${hasNew?'<th>Board score (now)</th>':''}<th>Projection edge</th><th class="groupsep">Under rate</th><th>Avg pts</th><th>Miss</th></tr></thead><tbody>${
+    bs.map(s=>`<tr><td class="l">${s.season}</td><td>${num(s.n)}</td><td>${c(s.board)}</td>${hasNew?`<td>${c(s.new)}</td>`:''}<td>${c(s.edge)}</td><td class="groupsep">${pct(s.under,1)}</td><td>${f1(s.pts)}</td><td>${sgn(s.resid,2)}</td></tr>`).join('')}</tbody>`;
+},'#seasons');
+
+/* model history */
+sec(()=>{
+  const H=model.history||[];
+  $('#histlede').textContent=model.version!=null?`The board is on model v${model.version}, updated ${model.updated||'—'}. Each row is one change to the weights and why it was made.`:'';
+  $('#hist').innerHTML=H.length?`<thead><tr><th class="l">Version</th><th class="l">Date</th>${WK.map(k=>`<th>${WL[k]}</th>`).join('')}<th class="l">Why</th></tr></thead><tbody>${
+    [...H].reverse().map(h=>`<tr><td class="l">v${h.version}</td><td class="l">${h.date}</td>${WK.map(k=>`<td>${Math.round(((h.weights||{})[k]||0)*100)}%</td>`).join('')}<td class="wrap">${h.why||''}</td></tr>`).join('')}</tbody>`:empty('No model history yet.');
+},'#hist');
+
+/* method */
+sec(()=>{
+  const FP=model.fatigue||{};
+  $('#method').innerHTML=[
+   `Data: ESPN box scores and player lines for every regular-season game, ${first} to ${last}, plus the season before ${first} for the first season's starting point. Closing spreads and totals come from the same feed; team totals are implied from them (total ± spread, halved).`,
+   `No peeking: each game only uses stats from before that date. Last season counts as ${model.priorGames||15} games and fades as the current season builds, like the live board.`,
+   `Schedule spots come from the schedule alone, with the same function the live board uses. The fatigue index adds ${FP.b2b!=null?FP.b2b+' for a back-to-back, ':''}${FP.threeInFour!=null?FP.threeInFour+' for a third game in four nights, ':''}${FP.altitude!=null?FP.altitude+' for visiting altitude, ':''}and smaller amounts for trips, travel distance and time zones${FP.restBonus!=null?', minus '+FP.restBonus+' for extra rest':''}.`,
+   `Availability is the share of the team's pregame scoring that belonged to regulars who did not play, which stands in for the injury report the live board reads from ESPN.`,
+   `Points include overtime. "Under" means the team finished strictly under its implied total; pushes count as not-under.`,
+   `Weights are fitted with logistic regression on "went over the line", with the last complete season held out as the test. The weekly learner refits the same way and moves at most 10 points per input per change.`,
+   `What this can't tell you: whether you could have got these closing numbers. Lines move, and the board reads them during the day, not at tip-off.`,
+  ].map(x=>`<li>${x}</li>`).join('');
+},'#method');
+</script>
