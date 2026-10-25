@@ -1,10 +1,10 @@
 {
  "season": "2026-27",
- "logged": 0,
+ "logged": 14,
  "graded": 0,
  "lined": 0,
- "today": "2026-10-16",
- "built": "2026-10-16 21:26",
+ "today": "2026-10-25",
+ "built": "2026-10-25 13:04",
  "model_version": 1,
  "weights": {
   "off": 0.2,
@@ -22,7 +22,20 @@
   "base_pts": 114.6,
   "base_under_implied": 0.486
  },
- "days": [],
- "games_today": 0,
+ "days": [
+  {
+   "date": "2026-10-25",
+   "rows": 14,
+   "graded": 0,
+   "proj": 114.69285714285715,
+   "pts": null,
+   "red_n": 0,
+   "red_under": 0,
+   "edge_n": 0,
+   "edge_under": 0,
+   "no_line": 0
+  }
+ ],
+ "games_today": 7,
  "alerts": []
 }
