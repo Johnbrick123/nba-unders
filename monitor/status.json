@@ -4,7 +4,7 @@
  "graded": 14,
  "lined": 14,
  "today": "2026-10-26",
- "built": "2026-10-26 00:47",
+ "built": "2026-10-26 13:05",
  "model_version": 1,
  "weights": {
   "off": 0.2,
@@ -164,7 +164,7 @@
    "n": 14,
    "rho": null,
    "ci": null,
-   "backtest": -0.02,
+   "backtest": -0.0207,
    "weight": 0.2
   },
   {
@@ -173,7 +173,7 @@
    "n": 14,
    "rho": null,
    "ci": null,
-   "backtest": -0.0007,
+   "backtest": 0.0014,
    "weight": 0.25
   },
   {
@@ -182,7 +182,7 @@
    "n": 14,
    "rho": null,
    "ci": null,
-   "backtest": 0.0016,
+   "backtest": 0.0008,
    "weight": 0.25
   },
   {
@@ -191,7 +191,7 @@
    "n": 14,
    "rho": null,
    "ci": null,
-   "backtest": 0.0113,
+   "backtest": 0.0096,
    "weight": 0.05
   },
   {
@@ -200,7 +200,7 @@
    "n": 14,
    "rho": null,
    "ci": null,
-   "backtest": 0.016,
+   "backtest": 0.0173,
    "weight": 0.05
   },
   {
@@ -209,7 +209,7 @@
    "n": 14,
    "rho": null,
    "ci": null,
-   "backtest": -0.0028,
+   "backtest": -0.0039,
    "weight": 0.1
   },
   {
@@ -235,13 +235,13 @@
    "date": "2026-10-26",
    "rows": 18,
    "graded": 0,
-   "proj": 116.36666666666666,
+   "proj": 116.35000000000001,
    "pts": null,
    "red_n": 0,
    "red_under": 0,
    "edge_n": 0,
    "edge_under": 0,
-   "no_line": 0
+   "no_line": 2
   },
   {
    "date": "2026-10-25",
