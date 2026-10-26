@@ -1,10 +1,10 @@
 {
  "season": "2026-27",
  "logged": 14,
- "graded": 0,
- "lined": 0,
+ "graded": 4,
+ "lined": 4,
  "today": "2026-10-25",
- "built": "2026-10-25 18:36",
+ "built": "2026-10-25 21:15",
  "model_version": 1,
  "weights": {
   "off": 0.2,
@@ -22,16 +22,224 @@
   "base_pts": 114.6,
   "base_under_implied": 0.486
  },
+ "avg_pts": 125.0,
+ "avg_proj": 117.025,
+ "ot_share": 0.0,
+ "under_rate": 0.25,
+ "avg_line": 117.25,
+ "auc": 1.0,
+ "auc_lo": 1.0,
+ "auc_hi": 1.0,
+ "auc_edge": 0.6666666666666666,
+ "bands": [
+  {
+   "band": "Under 30",
+   "n": 0,
+   "under": null,
+   "pts": null,
+   "resid": null
+  },
+  {
+   "band": "30\u201340",
+   "n": 0,
+   "under": null,
+   "pts": null,
+   "resid": null
+  },
+  {
+   "band": "40\u201350",
+   "n": 1,
+   "under": 1.0,
+   "pts": 109.0,
+   "resid": -3.5
+  },
+  {
+   "band": "50\u201360",
+   "n": 1,
+   "under": 0.0,
+   "pts": 136.0,
+   "resid": 17.0
+  },
+  {
+   "band": "60\u201370",
+   "n": 1,
+   "under": 0.0,
+   "pts": 123.0,
+   "resid": 7.5
+  },
+  {
+   "band": "70+",
+   "n": 1,
+   "under": 0.0,
+   "pts": 132.0,
+   "resid": 10.0
+  }
+ ],
+ "edges": [
+  {
+   "edge": "\u2264\u22124",
+   "n": 0,
+   "under": null,
+   "under_lo": null,
+   "pts": null,
+   "line": null
+  },
+  {
+   "edge": "\u22124\u2026\u22122",
+   "n": 1,
+   "under": 0.0,
+   "under_lo": 0.0,
+   "pts": 132.0,
+   "line": 122.0
+  },
+  {
+   "edge": "\u22122\u20260",
+   "n": 1,
+   "under": 0.0,
+   "under_lo": 0.0,
+   "pts": 123.0,
+   "line": 115.5
+  },
+  {
+   "edge": "0\u20262",
+   "n": 1,
+   "under": 1.0,
+   "under_lo": 0.20654329147389294,
+   "pts": 109.0,
+   "line": 112.5
+  },
+  {
+   "edge": "2\u20264",
+   "n": 0,
+   "under": null,
+   "under_lo": null,
+   "pts": null,
+   "line": null
+  },
+  {
+   "edge": "4+",
+   "n": 1,
+   "under": 0.0,
+   "under_lo": 0.0,
+   "pts": 136.0,
+   "line": 119.0
+  }
+ ],
+ "spots": [
+  {
+   "label": "Back-to-back",
+   "n": 1,
+   "under": 1.0,
+   "resid": -3.5
+  },
+  {
+   "label": "3rd game in 4 days",
+   "n": 0,
+   "under": null,
+   "resid": null
+  },
+  {
+   "label": "Fatigue 30+",
+   "n": 1,
+   "under": 1.0,
+   "resid": -3.5
+  },
+  {
+   "label": "Missing 15%+ of scoring",
+   "n": 0,
+   "under": null,
+   "resid": null
+  },
+  {
+   "label": "Opp fatigue 30+",
+   "n": 1,
+   "under": 0.0,
+   "resid": 17.0
+  }
+ ],
+ "inputs": [
+  {
+   "key": "off",
+   "label": "Offense",
+   "n": 4,
+   "rho": null,
+   "ci": null,
+   "backtest": -0.02,
+   "weight": 0.2
+  },
+  {
+   "key": "def",
+   "label": "Opp defense",
+   "n": 4,
+   "rho": null,
+   "ci": null,
+   "backtest": -0.0007,
+   "weight": 0.25
+  },
+  {
+   "key": "pace",
+   "label": "Pace",
+   "n": 4,
+   "rho": null,
+   "ci": null,
+   "backtest": 0.0016,
+   "weight": 0.25
+  },
+  {
+   "key": "fatigue",
+   "label": "Rest",
+   "n": 4,
+   "rho": null,
+   "ci": null,
+   "backtest": 0.0113,
+   "weight": 0.05
+  },
+  {
+   "key": "oppFatigue",
+   "label": "Opp rest",
+   "n": 4,
+   "rho": null,
+   "ci": null,
+   "backtest": 0.016,
+   "weight": 0.05
+  },
+  {
+   "key": "avail",
+   "label": "Availability",
+   "n": 4,
+   "rho": null,
+   "ci": null,
+   "backtest": -0.0028,
+   "weight": 0.1
+  },
+  {
+   "key": "l5",
+   "label": "Pts L5",
+   "n": 0,
+   "rho": null,
+   "ci": null,
+   "backtest": -0.0213,
+   "weight": 0.1
+  }
+ ],
+ "red": {
+  "n": 0,
+  "under": null
+ },
+ "green": {
+  "n": 1,
+  "over": 1.0
+ },
  "days": [
   {
    "date": "2026-10-25",
    "rows": 14,
-   "graded": 0,
+   "graded": 4,
    "proj": 114.50714285714285,
-   "pts": null,
+   "pts": 125.0,
    "red_n": 0,
    "red_under": 0,
-   "edge_n": 0,
+   "edge_n": 1,
    "edge_under": 0,
    "no_line": 0
   }
