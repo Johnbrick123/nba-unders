@@ -132,13 +132,34 @@ def availability(f, p):
     return f
 
 
+def league_ranks(f):
+    """Each team's league rank (1 = best offense / leakiest defense / fastest) as of each game date,
+    from the 30 teams' latest pregame values, for the top-10 vs bottom-10 matchup flags."""
+    out = []
+    for y, fs in f.groupby("season"):
+        snap = fs[["date", "team", "pre_ortg", "pre_drtg", "pre_pace"]].sort_values("date")
+        dates = pd.DataFrame({"date": sorted(fs.date.unique())})
+        rows = []
+        for t, tg in snap.groupby("team"):
+            m = pd.merge_asof(dates, tg.drop(columns="team"), on="date", direction="forward")
+            m["team"] = t
+            rows.append(m)
+        s = pd.concat(rows)
+        s["rk_off"] = s.groupby("date").pre_ortg.rank(ascending=False, method="first")
+        s["rk_def"] = s.groupby("date").pre_drtg.rank(ascending=False, method="first")
+        s["rk_pace"] = s.groupby("date").pre_pace.rank(ascending=False, method="first")
+        out.append(fs.merge(s[["date", "team", "rk_off", "rk_def", "rk_pace"]], on=["date", "team"], how="left"))
+    return pd.concat(out)
+
+
 def add_model(f, league):
     lg = pd.DataFrame({y: league[y - 1] for y in SEASONS}).T     # last season's league averages (known pregame)
     lg["ortg"] = 100 * lg.pts / lg.poss
     L = lg.loc[f.season].reset_index(drop=True)
     f = f.reset_index(drop=True)
-    opp = f[["gameId", "team", "pre_ortg", "pre_drtg", "pre_pace", "pre_pa", "fatigue", "lost", "b2b", "g4", "rest"]].rename(
+    opp = f[["gameId", "team", "pre_ortg", "pre_drtg", "pre_pace", "pre_pa", "fatigue", "lost", "b2b", "g4", "rest", "rk_def", "rk_pace"]].rename(
         columns={"team": "opp", "pre_ortg": "opp_ortg", "pre_drtg": "opp_drtg", "pre_pace": "opp_pace", "pre_pa": "opp_pa", "fatigue": "opp_fatigue",
+                 "rk_def": "rk_oppdef", "rk_pace": "rk_opppace",
                  "lost": "opp_lost", "b2b": "opp_b2b", "g4": "opp_g4", "rest": "opp_rest"})
     f = f.merge(opp, on=["gameId", "opp"], how="inner")
     L = lg.loc[f.season].reset_index(drop=True)
@@ -155,6 +176,10 @@ def add_model(f, league):
     f["over"] = (f.pts > f.implied).astype(int)
     f["lg_pts"] = L.pts
     f["over_lg"] = (f.pts > L.pts).astype(int)            # the board's job: rank spots by points vs league average
+    top, bot = lambda r: r <= 10, lambda r: r >= 21
+    f["matchup"] = np.select([top(f.rk_off) & top(f.rk_oppdef), bot(f.rk_off) & bot(f.rk_oppdef), top(f.rk_off) & bot(f.rk_oppdef), bot(f.rk_off) & top(f.rk_oppdef)],
+                             ["OVER", "UNDER", "STRENGTH", "WEAK"], "")
+    f["pace_tag"] = np.select([top(f.rk_pace) | top(f.rk_opppace), bot(f.rk_pace) & bot(f.rk_opppace)], ["fast", "slow"], "")
     f["proj_slope"] = 0.0
     return f
 
@@ -235,6 +260,7 @@ def main():
     g, p = load()
     f, league = team_features(g)
     f = availability(f, p)
+    f = league_ranks(f)
     f = add_model(f, league)
     f = subscores(f)
     f["score_default"] = board_score(f, DEFAULT_W)
@@ -282,7 +308,13 @@ def main():
              ("Rested (2+ days) vs tired opp (B2B)", (f.rest >= 2) & (f.opp_b2b == 1)), ("Tired (B2B) vs rested opp (2+ days)", (f.b2b == 1) & (f.opp_rest >= 2)),
              ("Fatigue index 30+", f.fatigue >= 30), ("Fatigue index 50+", f.fatigue >= 50), ("Fatigue 30+ and opp rested", (f.fatigue >= 30) & (f.opp_fatigue < 10)),
              ("Missing 15%+ of scoring", f.lost >= 0.15), ("Missing 25%+ of scoring", f.lost >= 0.25), ("Opp missing 15%+ of scoring", f.opp_lost >= 0.15),
-             ("Went to overtime", f.ot > 0)]
+             ("Went to overtime", f.ot > 0),
+             ("Matchup OVER: top-10 O vs bottom-10 D", (f.matchup == "OVER") & (f.n_cur >= 10)),
+             ("Matchup OVER + fast pace", (f.matchup == "OVER") & (f.pace_tag == "fast") & (f.n_cur >= 10)),
+             ("Matchup UNDER: bottom-10 O vs top-10 D", (f.matchup == "UNDER") & (f.n_cur >= 10)),
+             ("Matchup UNDER + slow pace", (f.matchup == "UNDER") & (f.pace_tag == "slow") & (f.n_cur >= 10)),
+             ("Matchup STRENGTH: top-10 O vs top-10 D", (f.matchup == "STRENGTH") & (f.n_cur >= 10)),
+             ("Matchup WEAK: bottom-10 O vs bottom-10 D", (f.matchup == "WEAK") & (f.n_cur >= 10))]
     res["spots"] = []
     for lab, m in spots:
         d = f[m]

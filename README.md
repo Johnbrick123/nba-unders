@@ -66,6 +66,14 @@ All free and public, no keys. Finished games are cached in `backtest/data/games_
 and `players_<season>.csv` (committed, so a season is only downloaded once). Arena
 coordinates, time zones and altitude are a table in `nbadata.py`.
 
+## Matchup flags
+Each row also shows the offense's league rank against the opponent's defense rank and flags
+the extremes: **OVER** (top-10 offense vs bottom-10 defense), **UNDER** (bottom-10 vs
+top-10), **STRENGTH** (top-10 vs top-10), **WEAK** (bottom-10 vs bottom-10), with fast/slow
+when pace is top or bottom 10. The backtest page reports how each flag did against the
+book; the short version is that the book prices the rankings. Only STRENGTH showed a lean
+(under 51.6%, or 52.8% with pushes left out), which is below break-even on its own.
+
 ## How the score works
 Each input is scaled 0–100 across the league (high = favors scoring for the team in the row)
 and combined with the weights in `model.json`:

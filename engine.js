@@ -6,6 +6,18 @@ function makeEngine(DATA){
   const mean=f=>AB.reduce((s,a)=>s+f(T[a]),0)/AB.length;
   const LG={pts:mean(t=>t.pts),pace:mean(t=>t.pace),ortg:mean(t=>t.ortg),drtg:mean(t=>t.drtg)};
   for(const a of AB){const t=T[a]; t.offR=t.ortg/LG.ortg; t.defR=t.drtg/LG.ortg; t.paceR=t.pace/LG.pace;}
+  // League ranks (1 = best offense, 1 = leakiest defense, 1 = fastest) for the top-10 / bottom-10 matchup flags
+  const rank=f=>{const s=[...AB].sort((a,b)=>f(T[b])-f(T[a]));const r={};s.forEach((a,i)=>r[a]=i+1);return r};
+  const RK={off:rank(t=>t.ortg),def:rank(t=>t.drtg),pace:rank(t=>t.pace)};
+  for(const a of AB){T[a].rkOff=RK.off[a];T[a].rkDef=RK.def[a];T[a].rkPace=RK.pace[a];}
+  // Matchup label: OVER = top-10 offense vs bottom-10 defense; UNDER = bottom-10 offense vs top-10 defense;
+  // STRENGTH = top-10 offense vs top-10 defense; WEAK = bottom-10 offense vs bottom-10 defense. Pace: fast/slow when either side is top/bottom 10.
+  function matchup(t,o){
+    const top=r=>r<=10, bot=r=>r>=AB.length-9;
+    const kind=top(t.rkOff)&&top(o.rkDef)?'OVER':bot(t.rkOff)&&bot(o.rkDef)?'UNDER':top(t.rkOff)&&bot(o.rkDef)?'STRENGTH':bot(t.rkOff)&&top(o.rkDef)?'WEAK':'';
+    const pace=top(t.rkPace)||top(o.rkPace)?'fast':bot(t.rkPace)&&bot(o.rkPace)?'slow':'';
+    return{kind,pace,label:`O${t.rkOff} vs D${o.rkDef}`};
+  }
 
   // Fatigue index 0-100 from the schedule features (mirrors nbadata.fatigue_points exactly)
   function fatigueIndex(f){
@@ -58,12 +70,12 @@ function makeEngine(DATA){
         oppFatigue:highGood(oppFat,SC.oppFatigue),avail:lowGood(av.lost,SC.avail),l5:t.l5==null?null:highGood(t.l5,SC.l5)};
       let num=0,den=0,partial=false; for(const k in W){if(s[k]==null){if(W[k]>0)partial=true;continue}num+=s[k]*W[k];den+=W[k]}
       const fin=g.state==='FINAL', actual=side==='away'?g.awayScore:g.homeScore, line=implied(g,side);
-      out.push({g,key:`${date}|${g.id}|${ab}`,ab,opp,t,o,ha:side==='home'?'Home':'Away',game:`${g.away} @ ${g.home}`,f,of,fat,oppFat,av,oav,poss,mu,
+      out.push({g,key:`${date}|${g.id}|${ab}`,ab,opp,t,o,ha:side==='home'?'Home':'Away',game:`${g.away} @ ${g.home}`,f,of,fat,oppFat,av,oav,poss,mu,mk:matchup(t,o),
         line,edge:line==null?null:line-mu,pUnder:line==null?null:Phi((line-mu)/P.sdTeam),
         s,total:den?num/den:null,partial,final:fin,actual});
     }
     return out;
   }
-  return {M,T,AB,LG,SC,fatigueIndex,lostShare,lowGood,highGood,Phi,american,implied,buildRows,gameTotal};
+  return {M,T,AB,LG,SC,RK,matchup,fatigueIndex,lostShare,lowGood,highGood,Phi,american,implied,buildRows,gameTotal};
 }
 if(typeof module!=='undefined')module.exports={makeEngine};

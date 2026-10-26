@@ -4,7 +4,7 @@
  "graded": 14,
  "lined": 14,
  "today": "2026-10-26",
- "built": "2026-10-26 15:22",
+ "built": "2026-10-26 22:46",
  "model_version": 1,
  "weights": {
   "off": 0.2,
@@ -155,6 +155,36 @@
    "n": 2,
    "under": 0.5,
    "resid": 4.0
+  },
+  {
+   "label": "Rested vs opp on back-to-back",
+   "n": 0,
+   "under": null,
+   "resid": null
+  },
+  {
+   "label": "Matchup OVER (top-10 O vs bottom-10 D)",
+   "n": 0,
+   "under": null,
+   "resid": null
+  },
+  {
+   "label": "Matchup UNDER (bottom-10 O vs top-10 D)",
+   "n": 0,
+   "under": null,
+   "resid": null
+  },
+  {
+   "label": "Matchup STRENGTH (top-10 O vs top-10 D)",
+   "n": 0,
+   "under": null,
+   "resid": null
+  },
+  {
+   "label": "Matchup WEAK (bottom-10 O vs bottom-10 D)",
+   "n": 0,
+   "under": null,
+   "resid": null
   }
  ],
  "inputs": [
@@ -235,7 +265,7 @@
    "date": "2026-10-26",
    "rows": 18,
    "graded": 0,
-   "proj": 116.22777777777777,
+   "proj": 116.24444444444445,
    "pts": null,
    "red_n": 0,
    "red_under": 0,

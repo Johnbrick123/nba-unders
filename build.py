@@ -154,7 +154,8 @@ def main():
 
 LOG_FIELDS = ["date", "gameId", "start", "team", "opp", "ha", "s_off", "s_def", "s_pace", "s_fatigue", "s_oppFatigue", "s_avail", "s_l5",
               "score", "proj", "line", "game_total", "spread", "p_under", "fatigue", "opp_fatigue", "rest", "b2b", "g4", "trip", "km",
-              "lost_share", "out", "model_version", "logged_at", "actual", "ot", "graded_at"]
+              "lost_share", "out", "opp_b2b", "rk_off", "rk_oppdef", "rk_pace", "rk_opppace", "matchup", "pace_tag",
+              "model_version", "logged_at", "actual", "ot", "graded_at"]
 
 
 def log_path(data):

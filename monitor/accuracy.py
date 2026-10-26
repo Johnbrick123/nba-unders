@@ -123,7 +123,12 @@ def main():
         # spots this season
         spots = [("Back-to-back", lambda r: r["b2b"] == "1"), ("3rd game in 4 days", lambda r: r["g4"] not in ("", None) and int(float(r["g4"])) >= 3),
                  ("Fatigue 30+", lambda r: float(r["fatigue"]) >= 30), ("Missing 15%+ of scoring", lambda r: r["lost_share"] != "" and float(r["lost_share"]) >= 0.15),
-                 ("Opp fatigue 30+", lambda r: float(r["opp_fatigue"]) >= 30)]
+                 ("Opp fatigue 30+", lambda r: float(r["opp_fatigue"]) >= 30),
+                 ("Rested vs opp on back-to-back", lambda r: r["rest"] not in ("", None) and int(float(r["rest"])) >= 2 and r.get("opp_b2b", "") == "1"),
+                 ("Matchup OVER (top-10 O vs bottom-10 D)", lambda r: r.get("matchup") == "OVER"),
+                 ("Matchup UNDER (bottom-10 O vs top-10 D)", lambda r: r.get("matchup") == "UNDER"),
+                 ("Matchup STRENGTH (top-10 O vs top-10 D)", lambda r: r.get("matchup") == "STRENGTH"),
+                 ("Matchup WEAK (bottom-10 O vs bottom-10 D)", lambda r: r.get("matchup") == "WEAK")]
         st["spots"] = []
         for lab, fn in spots:
             b = [r for r in lined if fn(r)]

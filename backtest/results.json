@@ -52,12 +52,12 @@
    "rho_resid": -0.0213,
    "auc": 0.4878,
    "binary": false,
-   "low_under": 0.4913,
-   "high_under": 0.5219,
-   "low_pts": 110.62,
-   "high_pts": 117.62,
-   "low_resid": 0.33,
-   "high_resid": -0.17
+   "low_under": 0.4908,
+   "high_under": 0.5213,
+   "low_pts": 110.67,
+   "high_pts": 117.64,
+   "low_resid": 0.37,
+   "high_resid": -0.15
   },
   {
    "label": "Opp DRtg",
@@ -150,11 +150,11 @@
    "rho_resid": 0.0173,
    "auc": 0.5078,
    "binary": false,
-   "low_under": 0.5111,
+   "low_under": 0.5106,
    "high_under": 0.4864,
-   "low_pts": 113.65,
+   "low_pts": 113.66,
    "high_pts": 115.57,
-   "low_resid": 0.09,
+   "low_resid": 0.1,
    "high_resid": 0.77
   },
   {
@@ -237,12 +237,12 @@
    "rho_resid": 0.012,
    "auc": 0.5049,
    "binary": false,
-   "low_under": 0.505,
-   "high_under": 0.4874,
-   "low_pts": 114.2,
-   "high_pts": 114.56,
-   "low_resid": 0.39,
-   "high_resid": 0.81
+   "low_under": 0.5171,
+   "high_under": 0.502,
+   "low_pts": 113.26,
+   "high_pts": 115.62,
+   "low_resid": -0.02,
+   "high_resid": 0.33
   },
   {
    "label": "Rest days",
@@ -251,12 +251,12 @@
    "rho_resid": 0.0046,
    "auc": 0.5035,
    "binary": false,
-   "low_under": 0.4975,
-   "high_under": 0.4914,
-   "low_pts": 113.97,
-   "high_pts": 115.31,
-   "low_resid": 0.45,
-   "high_resid": 0.63
+   "low_under": 0.501,
+   "high_under": 0.4894,
+   "low_pts": 113.66,
+   "high_pts": 115.34,
+   "low_resid": 0.34,
+   "high_resid": 0.56
   },
   {
    "label": "Road trip game #",
@@ -265,12 +265,12 @@
    "rho_resid": 0.0021,
    "auc": 0.5,
    "binary": false,
-   "low_under": 0.504,
-   "high_under": 0.4889,
-   "low_pts": 113.68,
-   "high_pts": 115.25,
-   "low_resid": 0.43,
-   "high_resid": 0.56
+   "low_under": 0.5015,
+   "high_under": 0.4924,
+   "low_pts": 113.57,
+   "high_pts": 115.7,
+   "low_resid": 0.5,
+   "high_resid": 0.28
   },
   {
    "label": "Travel km",
@@ -279,12 +279,12 @@
    "rho_resid": 0.0217,
    "auc": 0.5094,
    "binary": false,
-   "low_under": 0.5106,
-   "high_under": 0.4829,
-   "low_pts": 113.97,
-   "high_pts": 115.54,
-   "low_resid": 0.15,
-   "high_resid": 0.68
+   "low_under": 0.5101,
+   "high_under": 0.4965,
+   "low_pts": 113.98,
+   "high_pts": 115.22,
+   "low_resid": 0.16,
+   "high_resid": 0.27
   },
   {
    "label": "Time zones crossed",
@@ -293,12 +293,12 @@
    "rho_resid": 0.0183,
    "auc": 0.5069,
    "binary": false,
-   "low_under": 0.5081,
-   "high_under": 0.497,
-   "low_pts": 114.68,
-   "high_pts": 113.5,
-   "low_resid": 0.27,
-   "high_resid": 0.19
+   "low_under": 0.507,
+   "high_under": 0.4945,
+   "low_pts": 114.16,
+   "high_pts": 115.21,
+   "low_resid": 0.22,
+   "high_resid": 0.36
   },
   {
    "label": "Visiting altitude",
@@ -596,6 +596,78 @@
    "under_lo": 0.0968,
    "game_under": 0.1225,
    "pace": 112.09
+  },
+  {
+   "label": "Matchup OVER: top-10 O vs bottom-10 D",
+   "n": 953,
+   "share": 0.096,
+   "pts": 120.73,
+   "implied": 120.63,
+   "resid": 0.11,
+   "under": 0.4848,
+   "under_lo": 0.4532,
+   "game_under": 0.4858,
+   "pace": 102.46
+  },
+  {
+   "label": "Matchup OVER + fast pace",
+   "n": 600,
+   "share": 0.0604,
+   "pts": 122.38,
+   "implied": 122.16,
+   "resid": 0.22,
+   "under": 0.4767,
+   "under_lo": 0.437,
+   "game_under": 0.4833,
+   "pace": 103.39
+  },
+  {
+   "label": "Matchup UNDER: bottom-10 O vs top-10 D",
+   "n": 941,
+   "share": 0.0948,
+   "pts": 108.94,
+   "implied": 108.28,
+   "resid": 0.66,
+   "under": 0.4729,
+   "under_lo": 0.4412,
+   "game_under": 0.4761,
+   "pace": 101.65
+  },
+  {
+   "label": "Matchup UNDER + slow pace",
+   "n": 105,
+   "share": 0.0106,
+   "pts": 104.47,
+   "implied": 103.72,
+   "resid": 0.75,
+   "under": 0.4857,
+   "under_lo": 0.3923,
+   "game_under": 0.4571,
+   "pace": 97.62
+  },
+  {
+   "label": "Matchup STRENGTH: top-10 O vs top-10 D",
+   "n": 990,
+   "share": 0.0997,
+   "pts": 113.33,
+   "implied": 113.28,
+   "resid": 0.06,
+   "under": 0.5162,
+   "under_lo": 0.485,
+   "game_under": 0.5101,
+   "pace": 100.68
+  },
+  {
+   "label": "Matchup WEAK: bottom-10 O vs bottom-10 D",
+   "n": 971,
+   "share": 0.0978,
+   "pts": 115.44,
+   "implied": 114.74,
+   "resid": 0.7,
+   "under": 0.4727,
+   "under_lo": 0.4415,
+   "game_under": 0.5026,
+   "pace": 102.95
   }
  ],
  "composites": [

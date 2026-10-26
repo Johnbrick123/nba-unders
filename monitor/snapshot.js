@@ -13,8 +13,9 @@ const rows = E.buildRows(DATA.today).map(r => ({
   s_avail: r1(r.s.avail), s_l5: r1(r.s.l5),
   score: r1(r.total), proj: r1(r.mu), line: r.line == null ? '' : r1(r.line), game_total: r.g.total ?? '', spread: r.g.spread ?? '',
   p_under: r3(r.pUnder), fatigue: r1(r.fat), opp_fatigue: r1(r.oppFat),
-  rest: r.f ? r.f.rest : '', b2b: r.f ? r.f.b2b : '', g4: r.f ? r.f.g4 : '', trip: r.f ? r.f.trip : '', km: r.f ? r.f.km : '',
+  rest: r.f ? r.f.rest : '', b2b: r.f ? r.f.b2b : '', g4: r.f ? r.f.g4 : '', trip: r.f ? r.f.trip : '', km: r.f ? r.f.km : '', opp_b2b: r.of ? r.of.b2b : '',
   lost_share: r3(r.av.lost), out: r.av.who.filter(w => w.w >= 0.75).map(w => w.name).join('; '),
+  rk_off: r.t.rkOff, rk_oppdef: r.o.rkDef, rk_pace: r.t.rkPace, rk_opppace: r.o.rkPace, matchup: r.mk.kind, pace_tag: r.mk.pace,
   model_version: DATA.model.version,
 }));
 process.stdout.write(JSON.stringify(rows));
