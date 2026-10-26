@@ -126,9 +126,11 @@ td.na{color:#5b6672}
 </section>
 
 <section id="view-matchups" style="display:none">
-  <div class="toolbar"><select id="dateSel2" aria-label="Date"></select><span class="count">Uses the weights set on the Slate tab</span></div>
+  <div class="toolbar"><select id="dateSel2" aria-label="Date"></select>
+    <select id="mkFilter" aria-label="Mismatch"><option value="">All games</option><option value="OVER">Any OVER flag (top-10 O vs bottom-10 D)</option><option value="UNDER">Any UNDER flag (bottom-10 O vs top-10 D)</option><option value="STRENGTH">Any STRENGTH flag</option><option value="fast">Fast (a top-10 pace team)</option><option value="slow">Slow (both bottom-10 pace)</option><option value="oppb2b">A rested side vs a back-to-back</option></select>
+    <span class="count">Uses the weights set on the Slate tab</span></div>
   <div class="wrap">
-    <div class="mh">Game totals <span class="msub">sorted by edge toward the under: top = the model sees fewer points than the book. Combined = the two team scores added (0–200).</span></div>
+    <div class="mh">Game totals <span class="msub">sorted by edge toward the under: top = the model sees fewer points than the book. Mismatch = each side's offense rank vs the defense it faces, with the top-10/bottom-10 flags; Poss = expected possessions. In the backtest the book's total sits within a point of every flag combination, so read them as the shape of the game, not a pick.</span></div>
     <div class="scroll"><table id="tblTotal"></table></div>
     <div class="mh">Lopsided games <span class="msub">biggest gap between the two team scores — the red side is the under play</span></div>
     <div class="scroll"><table id="tblGap"></table></div>
@@ -276,15 +278,21 @@ function renderMatchups(rows){
     return{...d,A,H,comb:A.total!=null&&H.total!=null?A.total+H.total:null,mu:gt.mu,line:L,edge:L==null?null:L-gt.mu,pu:L==null?null:gt.under(L),
       gap:A.total!=null&&H.total!=null?Math.abs(A.total-H.total):null,lean:A.total<=H.total?A:H}});
   const side=r=>`${r.ab} ${chip(r.total)}`;
-  let t=`<thead><tr><th class="l">#</th><th class="l">Game</th><th>Away</th><th>Home</th><th class="groupsep">Combined</th><th>Proj total</th><th>Book total</th><th>Edge ▼</th><th>Under %</th><th class="l">Spots</th></tr></thead><tbody>`;
-  [...data].sort((a,b)=>(b.edge??-99)-(a.edge??-99)).forEach((d,i)=>{const sp=[];for(const r of [d.A,d.H]){if(r.f&&r.f.b2b)sp.push(r.ab+' B2B');if(r.f&&r.f.g4>=3)sp.push(r.ab+' 3in4');if(r.av.lost>=0.1)sp.push(r.ab+' -'+(r.av.lost*100).toFixed(0)+'% pts')}
+  const mkf=$('#mkFilter').value;
+  const keep=d=>!mkf||(mkf==='fast'||mkf==='slow'?d.A.mk.pace===mkf:mkf==='oppb2b'?[d.A,d.H].some(r=>r.of&&r.of.b2b&&r.f&&r.f.rest>=2):[d.A,d.H].some(r=>r.mk.kind===mkf));
+  const mkSide=r=>`<span class="sub">${r.ab}</span> ${r.mk.label}${r.mk.kind?` <span class="pk ${MK_CLS[r.mk.kind]}">${r.mk.kind}</span>`:''}`;
+  const paceCell=d=>{const u=highGood(d.A.poss,SC.pace),bg=heat(u);return`<span class="cellscore" style="padding:2px 6px;${u==null?'':`background:${bg}22;color:${bg}`}">${d.A.poss.toFixed(1)}</span>${d.A.mk.pace?` <span class="sub">${d.A.mk.pace}</span>`:''}`};
+  const shown=data.filter(keep);
+  let t=`<thead><tr><th class="l">#</th><th class="l">Game</th><th>Away</th><th>Home</th><th class="l groupsep">Mismatch</th><th>Poss</th><th class="groupsep">Combined</th><th>Proj total</th><th>Book total</th><th>Edge ▼</th><th>Under %</th><th class="l">Spots</th></tr></thead><tbody>`;
+  [...shown].sort((a,b)=>(b.edge??-99)-(a.edge??-99)).forEach((d,i)=>{const sp=[];for(const r of [d.A,d.H]){if(r.f&&r.f.b2b)sp.push(r.ab+' B2B');if(r.f&&r.f.g4>=3)sp.push(r.ab+' 3in4');if(r.av.lost>=0.1)sp.push(r.ab+' -'+(r.av.lost*100).toFixed(0)+'% pts')}
     t+=`<tr><td class="l sub">${i+1}</td><td class="l">${d.g.away} @ ${d.g.home}</td><td>${side(d.A)}</td><td>${side(d.H)}</td>
+    <td class="l groupsep">${mkSide(d.A)}<br>${mkSide(d.H)}</td><td>${paceCell(d)}</td>
     <td class="groupsep">${d.comb==null?chip(null):`<span class="mini" style="background:${heat(d.comb/2)}">${d.comb.toFixed(1)}</span>`}</td><td><b>${d.mu.toFixed(1)}</b></td><td>${d.line==null?'<span class="na">—</span>':d.line}</td>
     <td>${d.edge==null?'<span class="na">—</span>':`<span class="edge ${d.edge>=3?'u':d.edge<=-3?'o':''}">${d.edge>0?'+':''}${d.edge.toFixed(1)}</span>`}</td>
     <td>${d.pu==null?'<span class="na">—</span>':`<b>${(d.pu*100).toFixed(0)}%</b> <span class="sub">${american(d.pu)}</span>`}</td><td class="l sub">${sp.join(' · ')||'—'}</td></tr>`});
   $('#tblTotal').innerHTML=t+'</tbody>';
   let s=`<thead><tr><th class="l">#</th><th class="l">Game</th><th>Away</th><th>Home</th><th class="groupsep">Gap</th><th class="l">Play</th></tr></thead><tbody>`;
-  [...data].sort((a,b)=>(b.gap??-1)-(a.gap??-1)).forEach((d,i)=>{s+=`<tr><td class="l sub">${i+1}</td><td class="l">${d.g.away} @ ${d.g.home}</td><td>${side(d.A)}</td><td>${side(d.H)}</td>
+  [...shown].sort((a,b)=>(b.gap??-1)-(a.gap??-1)).forEach((d,i)=>{s+=`<tr><td class="l sub">${i+1}</td><td class="l">${d.g.away} @ ${d.g.home}</td><td>${side(d.A)}</td><td>${side(d.H)}</td>
     <td class="groupsep">${d.gap==null?'—':`<span class="mini" style="background:${heat(Math.min(100,d.gap*2.2))}">${d.gap.toFixed(1)}</span>`}</td>
     <td class="l"><span class="lean">${d.lean.ab} under</span> <span class="sub">proj ${d.lean.mu.toFixed(1)}${d.lean.line!=null?` vs book ${d.lean.line.toFixed(1)} (${(d.lean.pUnder*100).toFixed(0)}% under)`:''}</span></td></tr>`});
   $('#tblGap').innerHTML=s+'</tbody>';
@@ -368,7 +376,7 @@ $('#method').innerHTML=`
 document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.toggle('active',x===t));
   ['slate','matchups','teams','fatigue','injuries','method'].forEach(v=>$('#view-'+v).style.display=v===t.dataset.tab?'':'none')});
-$('#q').oninput=render; $('#haFilter').onchange=render; $('#spotFilter').onchange=render; $('#minScore').oninput=render;
+$('#q').oninput=render; $('#haFilter').onchange=render; $('#spotFilter').onchange=render; $('#minScore').oninput=render; $('#mkFilter').onchange=render;
 $('#toggleInputs').onclick=e=>{showInputs=!showInputs;e.target.classList.toggle('on',showInputs);e.target.textContent=showInputs?'Hide raw inputs':'Show raw inputs';render()};
 $('#toggleWeights').onclick=e=>{const o=$('#weights').classList.toggle('open');e.target.classList.toggle('on',o)};
 buildWeights(); renderTeams(); renderInjuries(); render();
