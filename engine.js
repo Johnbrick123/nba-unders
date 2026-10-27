@@ -6,15 +6,15 @@ function makeEngine(DATA){
   const mean=f=>AB.reduce((s,a)=>s+f(T[a]),0)/AB.length;
   const LG={pts:mean(t=>t.pts),pace:mean(t=>t.pace),ortg:mean(t=>t.ortg),drtg:mean(t=>t.drtg)};
   for(const a of AB){const t=T[a]; t.offR=t.ortg/LG.ortg; t.defR=t.drtg/LG.ortg; t.paceR=t.pace/LG.pace;}
-  // League ranks (1 = best offense, 1 = leakiest defense, 1 = fastest) for the top-10 / bottom-10 matchup flags
+  // League ranks, 1 = best in every column: best offense, best defense (fewest points allowed per 100), fastest pace
   const rank=f=>{const s=[...AB].sort((a,b)=>f(T[b])-f(T[a]));const r={};s.forEach((a,i)=>r[a]=i+1);return r};
-  const RK={off:rank(t=>t.ortg),def:rank(t=>t.drtg),pace:rank(t=>t.pace)};
+  const RK={off:rank(t=>t.ortg),def:rank(t=>-t.drtg),pace:rank(t=>t.pace)};
   for(const a of AB){T[a].rkOff=RK.off[a];T[a].rkDef=RK.def[a];T[a].rkPace=RK.pace[a];}
   // Matchup label: OVER = top-10 offense vs bottom-10 defense; UNDER = bottom-10 offense vs top-10 defense;
   // STRENGTH = top-10 offense vs top-10 defense; WEAK = bottom-10 offense vs bottom-10 defense. Pace: fast/slow when either side is top/bottom 10.
   function matchup(t,o){
     const top=r=>r<=10, bot=r=>r>=AB.length-9;
-    const kind=top(t.rkOff)&&top(o.rkDef)?'OVER':bot(t.rkOff)&&bot(o.rkDef)?'UNDER':top(t.rkOff)&&bot(o.rkDef)?'STRENGTH':bot(t.rkOff)&&top(o.rkDef)?'WEAK':'';
+    const kind=top(t.rkOff)&&bot(o.rkDef)?'OVER':bot(t.rkOff)&&top(o.rkDef)?'UNDER':top(t.rkOff)&&top(o.rkDef)?'STRENGTH':bot(t.rkOff)&&bot(o.rkDef)?'WEAK':'';
     const pace=top(t.rkPace)||top(o.rkPace)?'fast':bot(t.rkPace)&&bot(o.rkPace)?'slow':'';
     return{kind,pace,label:`O${t.rkOff} vs D${o.rkDef}`};
   }

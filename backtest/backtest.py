@@ -133,7 +133,7 @@ def availability(f, p):
 
 
 def league_ranks(f):
-    """Each team's league rank (1 = best offense / leakiest defense / fastest) as of each game date,
+    """Each team's league rank (1 = best offense / best defense / fastest) as of each game date,
     from the 30 teams' latest pregame values, for the top-10 vs bottom-10 matchup flags."""
     out = []
     for y, fs in f.groupby("season"):
@@ -146,7 +146,7 @@ def league_ranks(f):
             rows.append(m)
         s = pd.concat(rows)
         s["rk_off"] = s.groupby("date").pre_ortg.rank(ascending=False, method="first")
-        s["rk_def"] = s.groupby("date").pre_drtg.rank(ascending=False, method="first")
+        s["rk_def"] = s.groupby("date").pre_drtg.rank(ascending=True, method="first")
         s["rk_pace"] = s.groupby("date").pre_pace.rank(ascending=False, method="first")
         out.append(fs.merge(s[["date", "team", "rk_off", "rk_def", "rk_pace"]], on=["date", "team"], how="left"))
     return pd.concat(out)
@@ -177,7 +177,7 @@ def add_model(f, league):
     f["lg_pts"] = L.pts
     f["over_lg"] = (f.pts > L.pts).astype(int)            # the board's job: rank spots by points vs league average
     top, bot = lambda r: r <= 10, lambda r: r >= 21
-    f["matchup"] = np.select([top(f.rk_off) & top(f.rk_oppdef), bot(f.rk_off) & bot(f.rk_oppdef), top(f.rk_off) & bot(f.rk_oppdef), bot(f.rk_off) & top(f.rk_oppdef)],
+    f["matchup"] = np.select([top(f.rk_off) & bot(f.rk_oppdef), bot(f.rk_off) & top(f.rk_oppdef), top(f.rk_off) & top(f.rk_oppdef), bot(f.rk_off) & bot(f.rk_oppdef)],
                              ["OVER", "UNDER", "STRENGTH", "WEAK"], "")
     f["pace_tag"] = np.select([top(f.rk_pace) | top(f.rk_opppace), bot(f.rk_pace) & bot(f.rk_opppace)], ["fast", "slow"], "")
     f["proj_slope"] = 0.0
