@@ -125,6 +125,8 @@ def main():
                  ("Fatigue 30+", lambda r: float(r["fatigue"]) >= 30), ("Missing 15%+ of scoring", lambda r: r["lost_share"] != "" and float(r["lost_share"]) >= 0.15),
                  ("Opp fatigue 30+", lambda r: float(r["opp_fatigue"]) >= 30),
                  ("Rested vs opp on back-to-back", lambda r: r["rest"] not in ("", None) and int(float(r["rest"])) >= 2 and r.get("opp_b2b", "") == "1"),
+                 ("Pick-em game (spread within 2.5)", lambda r: r["spread"] not in ("", None) and abs(float(r["spread"])) <= 2.5),
+                 ("Blowout spread (10+)", lambda r: r["spread"] not in ("", None) and abs(float(r["spread"])) >= 10),
                  ("Matchup OVER (top-10 O vs bottom-10 D)", lambda r: r.get("matchup") == "OVER"),
                  ("Matchup UNDER (bottom-10 O vs top-10 D)", lambda r: r.get("matchup") == "UNDER"),
                  ("Matchup STRENGTH (top-10 O vs top-10 D)", lambda r: r.get("matchup") == "STRENGTH"),

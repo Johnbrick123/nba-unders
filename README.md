@@ -74,6 +74,12 @@ when pace is top or bottom 10. The backtest page reports how each flag did again
 book; the short version is that the book prices the rankings. Only STRENGTH showed a lean
 (under 51.6%, or 52.8% with pushes left out), which is below break-even on its own.
 
+## Close games and blowouts
+The Game totals tab also tags the closing spread: **Pick-em** (within 2.5) and **Blowout**
+(10+). In the backtest pick-em games went under 53.3% of the time (1,050 games, positive in
+three of four seasons) and blowout spreads went over 51.9%; the only game-level lean above
+break-even is the pick-em under. Overtime itself is priced into the book's total.
+
 ## How the score works
 Each input is scaled 0–100 across the league (high = favors scoring for the team in the row)
 and combined with the weights in `model.json`:
