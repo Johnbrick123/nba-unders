@@ -4,7 +4,7 @@
  "graded": 220,
  "lined": 220,
  "today": "2026-11-09",
- "built": "2026-11-09 16:12",
+ "built": "2026-11-09 18:00",
  "model_version": 1,
  "weights": {
   "off": 0.2,
@@ -277,7 +277,7 @@
    "date": "2026-11-09",
    "rows": 16,
    "graded": 0,
-   "proj": 114.58125,
+   "proj": 114.43125,
    "pts": null,
    "red_n": 0,
    "red_under": 0,
