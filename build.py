@@ -128,6 +128,10 @@ def main():
                 seasons=dict(prior=nd.season_label(prior_y), cur=nd.season_label(cur_y)),
                 priorGames=PRIOR_GAMES, teams=teams, schedule=window, features=features,
                 injuries=inj, players=players, model=MODEL)
+    res = HERE / "backtest" / "results.json"
+    if res.exists():
+        r = json.loads(res.read_text(encoding="utf-8"))
+        data["ladder"] = {"team": r.get("ladder_team", []), "game": r.get("ladder_game", [])}
     status = HERE / "monitor" / "status.json"
     if status.exists():
         data["monitor"] = {k: v for k, v in json.loads(status.read_text(encoding="utf-8")).items() if k in ("auc", "graded", "under_implied")}

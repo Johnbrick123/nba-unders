@@ -411,6 +411,20 @@ def main():
     res["proj_slope"] = round(float(np.polyfit(f.proj[m], f.pts[m], 1)[0]), 3)
     res["auc_lg_all"] = round(auc(f.score_default, f.over_lg), 4)
     res["auc_mkt_all"] = round(auc(f.score_default, f.over), 4)
+    # what each score band actually produced: thresholds for team and game points (a "how much room is there" reference)
+    tb = [(-1, 25), (25, 35), (35, 45), (45, 55), (55, 65), (65, 75), (75, 101)]
+    res["ladder_team"] = [dict(band=f"{max(lo, 0)}-{min(hi, 100)}", n=int(len(d)), pts=round(d.pts.mean(), 1), book=round(d.implied.mean(), 1),
+                               le100=round(float((d.pts <= 100).mean()), 3), le105=round(float((d.pts <= 105).mean()), 3), le110=round(float((d.pts <= 110).mean()), 3),
+                               ge115=round(float((d.pts >= 115).mean()), 3), ge120=round(float((d.pts >= 120).mean()), 3), ge125=round(float((d.pts >= 125).mean()), 3),
+                               over=round(float((d.pts > d.implied).mean()), 3))
+                          for lo, hi in tb for d in [f[(f.score_default >= lo) & (f.score_default < hi)]] if len(d) >= 30]
+    gm2 = gm.assign(tot=gm.pts + gm.pa)
+    gb2 = [(-1, 70), (70, 85), (85, 100), (100, 115), (115, 130), (130, 145), (145, 201)]
+    res["ladder_game"] = [dict(band=f"{max(lo, 0)}-{min(hi, 200)}", n=int(len(d)), tot=round(d.tot.mean(), 1), book=round(d.total.mean(), 1),
+                               le210=round(float((d.tot <= 210).mean()), 3), le215=round(float((d.tot <= 215).mean()), 3), le220=round(float((d.tot <= 220).mean()), 3),
+                               ge230=round(float((d.tot >= 230).mean()), 3), ge235=round(float((d.tot >= 235).mean()), 3), ge240=round(float((d.tot >= 240).mean()), 3),
+                               over=round(float((d.tot > d.total).mean()), 3))
+                          for lo, hi in gb2 for d in [gm2[(gm2.combined >= lo) & (gm2.combined < hi)]] if len(d) >= 30]
     (HERE / "results.json").write_text(json.dumps(res, indent=1, default=float), encoding="utf-8")
     f.to_csv(HERE / "team_games_scored.csv", index=False)
     print(json.dumps({k: res[k] for k in ["n", "base_under", "base_pts", "base_implied", "sd_resid", "proj_bias", "proj_slope", "team_sd", "game_sd", "measured", "fitted_w", "suggested_w", "auc_lg_all", "auc_mkt_all", "test", "by_season"]}, indent=1, default=float))
