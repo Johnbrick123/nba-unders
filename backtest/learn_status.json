@@ -1,7 +1,7 @@
 {
- "date": "2026-11-09",
- "data_through": "2026-11-08",
- "current_n": 292,
+ "date": "2026-11-16",
+ "data_through": "2026-11-15",
+ "current_n": 394,
  "model_version": 1,
  "current": {
   "off": 0.2,
@@ -31,23 +31,23 @@
   "l5": 0.15
  },
  "metrics": {
-  "val_n": 292,
-  "val_cur": 0.6412,
-  "val_new": 0.6407,
-  "val_target": 0.6407,
+  "val_n": 394,
+  "val_cur": 0.6557,
+  "val_new": 0.6561,
+  "val_target": 0.6561,
   "prev_cur": 0.6685,
   "prev_new": 0.6666
  },
  "measured": {
-  "home": 1.0086,
+  "home": 1.0088,
   "away": 0.9867,
-  "fatigueK": 0.0353,
-  "oppFatigueK": 0.0245,
-  "availK": 0.081,
-  "sdTeam": 11.67,
-  "sdGame": 18.88
+  "fatigueK": 0.0352,
+  "oppFatigueK": 0.0247,
+  "availK": 0.0807,
+  "sdTeam": 11.68,
+  "sdGame": 18.87
  },
  "decision": "waiting",
- "reason": "Only 292 team-games played this season; changes need 500. The fit is shown for reference.",
+ "reason": "Only 394 team-games played this season; changes need 500. The fit is shown for reference.",
  "alerts": []
 }
