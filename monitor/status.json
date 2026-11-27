@@ -1,10 +1,10 @@
 {
  "season": "2026-27",
- "logged": 468,
+ "logged": 490,
  "graded": 468,
  "lined": 466,
- "today": "2026-11-26",
- "built": "2026-11-26 03:17",
+ "today": "2026-11-27",
+ "built": "2026-11-27 00:05",
  "model_version": 1,
  "weights": {
   "off": 0.2,
@@ -279,6 +279,18 @@
  },
  "days": [
   {
+   "date": "2026-11-27",
+   "rows": 22,
+   "graded": 0,
+   "proj": 113.89090909090909,
+   "pts": null,
+   "red_n": 0,
+   "red_under": 0,
+   "edge_n": 0,
+   "edge_under": 0,
+   "no_line": 0
+  },
+  {
    "date": "2026-11-25",
    "rows": 18,
    "graded": 18,
@@ -433,20 +445,8 @@
    "edge_n": 0,
    "edge_under": 0,
    "no_line": 0
-  },
-  {
-   "date": "2026-11-12",
-   "rows": 8,
-   "graded": 8,
-   "proj": 111.825,
-   "pts": 117.875,
-   "red_n": 2,
-   "red_under": 1,
-   "edge_n": 1,
-   "edge_under": 0,
-   "no_line": 0
   }
  ],
- "games_today": 0,
+ "games_today": 11,
  "alerts": []
 }
